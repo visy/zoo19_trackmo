@@ -29,6 +29,22 @@ zero_bits  = COLOUR_MEDIUMGREY
 
 		    cli                 ; Enable interrupts again
 
+			lda #0
+			sta $ff19 ; border
+
+		    lda #%00100000 ; screen off
+			sta $ff06
+
+	        jsr install
+
+	        ldx #<filename2
+            ldy #>filename2
+            jsr loadraw
+
+	        ldx #<filename1
+            ldy #>filename1
+            jsr loadraw
+
 		    lda #%00110000 ; mc, bitmap
 			sta $ff06
 
@@ -46,17 +62,6 @@ zero_bits  = COLOUR_MEDIUMGREY
 
 		 	lda #0
 		 	sta $ff15 ; bgcolor
-
-	        jsr install
-
-	        ldx #<filename1
-            ldy #>filename1
-            jsr loadraw
-
-	        ldx #<filename2
-            ldy #>filename2
-            jsr loadraw
-
 			sta $ff3e
 
 mainloop:
