@@ -108,8 +108,8 @@ LOADER_SRC   = ../../src
 LOADER       = $(BUILDDIR)/loader-$(_PLATFORM_).prg
 
 RESOURCESDIR = ../resources
-PIC1         = $(INTERMDIR)/pic1.bin
-PIC2         = $(INTERMDIR)/pic2.bin
+PIC1         = signcol.bin
+PIC2         = sign.bin
 
 NAME         = minexample
 
@@ -118,7 +118,7 @@ LOADERCFG    = loaderconfig.inc
 ASSEMBLE     = $(INTERMDIR)/$(NAME)-uncompressed-$(_PLATFORM_).prg
 DISKIMAGE    = $(BUILDDIR)/$(NAME)-$(_PLATFORM_).d64
 
-AS_FLAGS     = -Wa -I../../../shared -I ../../include --cpu 6502X -u __EXEHDR__
+AS_FLAGS     = -Wa -I../../../shared -I ../../include --cpu 6502X 
 
 
 default: diskimage
@@ -131,10 +131,8 @@ tellarch:
 loader: $(LOADER)
 
 $(LOADER): $(LOADERCFG)
-	make -C $(LOADER_SRC) EXTCONFIGPATH=../samples/$(NAME) INSTALL=2000 RESIDENT=1800 ZP=02 prg
+	make -C $(LOADER_SRC) EXTCONFIGPATH=../samples/$(NAME) INSTALL=2800 RESIDENT=2000 ZP=02 prg
 
-
-assemble: $(ASSEMBLE)
 
 $(ASSEMBLE): $(SOURCE) $(LOADER) $(LOADERCFG)
 	$(MKDIR) $(BUILDDIR)
@@ -152,8 +150,8 @@ $(DISKIMAGE): $(ASSEMBLE) $(PIC1) $(PIC2)
 	$(C1541) -format "normal is boring,+h" d64 $@
 	$(C1541) -attach $@ \
 	 -write $(ASSEMBLE) "$(NAME)" \
-	 -write $(PIC1) "pic1" \
-	 -write $(PIC2) "pic2"
+	 -write $(PIC1) "signcol" \
+	 -write $(PIC2) "sign"
 
 
 ifneq ($(USE_YAPE),0)
@@ -163,11 +161,6 @@ else
 run: $(DISKIMAGE)
 	$(EMU) $^
 endif
-
-
-$(INTERMDIR)/%.bin: $(RESOURCESDIR)/%.bin
-	$(PRINTF) '\000\140' | $(CAT) - $? > $@ # octal 140 = hex 60
-
 
 clean:
 	-$(RM) *.o $(ASSEMBLE) $(DISKIMAGE)
