@@ -12,7 +12,7 @@ PLATFORM                           = diskio::platform::COMMODORE_16; available a
 
 ; parameter, this changes the host-side code only
 
-DECOMPRESSOR                       = DECOMPRESSORS::TINYCRUNCH; available are NONE, BITNAX (recommended for demos), BYTEBOOZER2, DOYNAX_LZ, EXOMIZER, LEVELCRUSH, NUCRUNCH, PUCRUNCH, SUBSIZER, TINYCRUNCH (recommended for demos)
+DECOMPRESSOR                       = DECOMPRESSORS::NONE; available are NONE, BITNAX (recommended for demos), BYTEBOOZER2, DOYNAX_LZ, EXOMIZER, LEVELCRUSH, NUCRUNCH, PUCRUNCH, SUBSIZER, TINYCRUNCH (recommended for demos)
 
 LC_SPEED                           = 6 ; Taboo Levelcrush speed, irrelevant if using any other or no compressor
 
@@ -25,7 +25,7 @@ LC_SPEED                           = 6 ; Taboo Levelcrush speed, irrelevant if u
 
 ; basic features, different settings can be run with the same installed drive code, increase host-side code size
 
-.define LOAD_COMPD_API             1 ; include the loadcompd routine to load and depack compressed files on the fly
+.define LOAD_COMPD_API             0 ; include the loadcompd routine to load and depack compressed files on the fly
                                      ; requires DECOMPRESSOR != DECOMPRESSORS::NONE
 
 .define LOAD_RAW_API               1 ; include the loadraw routine to load files without decompressing
@@ -65,7 +65,7 @@ LC_SPEED                           = 6 ; Taboo Levelcrush speed, irrelevant if u
                                      ; the file's loading address can be found in loadaddrlo/loadaddrhi during and after loading, so polling the current
                                      ; difference of endaddrlo/hi and loadaddrlo/hi can be used to implement progress displays.
 
-.define LOAD_VIA_KERNAL_FALLBACK   1 ; loads via the KERNAL API if drive code installation was not successful
+.define LOAD_VIA_KERNAL_FALLBACK   0 ; loads via the KERNAL API if drive code installation was not successful
                                      ; (i.e., if it cannot installed due to an incompatible drive (everything that is not
                                      ; a 1541, 1541-C, 1541-II, 1570, 1571, 1571CR, 1581, or FD2000/4000),
                                      ; or true drive emulation being disabled.
@@ -115,5 +115,5 @@ LC_SPEED                           = 6 ; Taboo Levelcrush speed, irrelevant if u
 
 ; this reduces host-side install code
 
-.define ONLY_1541_AND_COMPATIBLE   0 ; reduces host-side install code by omitting any native custom drive code for non-1541 compatible
+.define ONLY_1541_AND_COMPATIBLE   1 ; reduces host-side install code by omitting any native custom drive code for non-1541 compatible
                                      ; drives, treats any drive as 1541, using an incompatible drive will cause undefined behaviour

@@ -19,6 +19,27 @@ zero_bits  = COLOUR_MEDIUMGREY
 
 			sta $ff3e
 
+			lda #0
+			sta $ff15
+
+
+		    lda #%00100000 ; screen off
+			sta $ff06
+
+	        jsr install
+
+			ldx #<screen1
+			ldy #>screen1
+			jsr loadraw
+
+			ldx #<screen2
+			ldy #>screen2
+			jsr loadraw
+
+			ldx #<screen3
+			ldy #>screen3
+			jsr loadraw
+
 		    lda #<irq_vector    ; Set IRQ vector to be called
 		    sta $0314           ; Once per screen refresh
 		    lda #>irq_vector
@@ -32,18 +53,6 @@ zero_bits  = COLOUR_MEDIUMGREY
 			lda #0
 			sta $ff19 ; border
 
-		    lda #%00100000 ; screen off
-			sta $ff06
-
-	        jsr install
-
-	        ldx #<filename2
-            ldy #>filename2
-            jsr loadraw
-
-	        ldx #<filename1
-            ldy #>filename1
-            jsr loadraw
 
 		    lda #%00110000 ; mc, bitmap
 			sta $ff06
@@ -63,6 +72,7 @@ zero_bits  = COLOUR_MEDIUMGREY
 		 	lda #0
 		 	sta $ff15 ; bgcolor
 			sta $ff3e
+
 
 mainloop:
 
@@ -84,44 +94,27 @@ error:      ldx #COLOUR_BLACK
             jmp :-
 
             
-filename1:  .asciiz "signcol"
-filename2:  .asciiz "sign"
-
-ptr: .word 0
-
-partpattlen: .byte 64,1,1,1 
-partpattextra: .byte 240,255,128,255
-demoparts: .word dosign, dotalk, dosign, dotalk
-
-signinit: .byte 0
-
-partframes: .byte 0
-partpatts: .byte 0
-demopart: .byte 0
-
-wordval: .word $0878
-
-xl1: .byte 23,23,23,23,23,23,29,29,29,29,29,29,23,23,23,23,23,23
-
-xl2: .byte 17,17,17,17,17,17,11,11,11,11,11,11,17,17,17,17,17,17
-
-x1: .byte 0
-x2: .byte 0 
-xt: .byte 0
-
-lumavals: .byte 32,64,128,82,14,55,191
 
 dosign:
 	lda #0
 	sta $ff19 ; border
+	sta talkinit
 
 	lda signinit
 	cmp #1
 	beq signdone
-	ldx #4
+	ldx #5
 	lda tedvidoffs,x
 	clc
 	sta $ff12
+
+    ldx #<filename2
+    ldy #>filename2
+    jsr loadraw
+
+    ldx #<filename1
+    ldy #>filename1
+    jsr loadraw
 
 	lda #1
 	sta signinit
@@ -214,31 +207,74 @@ ok:
 
 	jmp mainloop
 
-pixbuf: ; gradient
-	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,110,110,110,110,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,0,0,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,40,40,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,40,40,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,40,40,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,42,42,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-	.byte 0,0,0,0,0,0,0,0,0,0,0,110,110,110,110,110,110,110,0,48,48,0,110,110,110,110,110,110,110,0,0,0,0,0,0,0,0,0,0,0
-	.byte 0,0,0,0,0,0,0,0,0,0,0,110,0,0,0,0,0,0,65,65,65,65,0,0,0,0,0,0,110,0,0,0,0,0,0,0,0,0,0,0
-	.byte 0,0,0,0,0,0,0,0,0,0,0,110,0,40,40,40,42,48,65,123,123,65,48,42,40,40,40,0,110,0,0,0,0,0,0,0,0,0,0,0
-	.byte 0,0,0,0,0,0,0,0,0,0,0,110,0,40,40,40,42,48,65,123,123,65,48,42,40,40,40,0,110,0,0,0,0,0,0,0,0,0,0,0
-	.byte 0,0,0,0,0,0,0,0,0,0,0,110,0,0,0,0,0,0,65,65,65,65,0,0,0,0,0,0,110,0,0,0,0,0,0,0,0,0,0,0
-	.byte 0,0,0,0,0,0,0,0,0,0,0,110,110,110,110,110,110,110,0,48,48,0,110,110,110,110,110,110,110,0,0,0,0,0,0,0,0,0,0,0
-	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,42,42,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,40,40,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,40,40,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,40,40,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,0,0,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,110,110,110,110,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 
+
+talkinit: .byte 0
 
 dotalk:
+	lda #0
+	sta signinit
 ;;;;;;;;;;;;;;; talk anim
 	jsr next_rnd
 
+	lda talkinit
+	cmp #1
+	beq dotalk2
+
+	lda #1
+	sta talkinit
+
+		    lda #%00100000 ; screen off
+			sta $ff06
+
+
+	ldx #<color1
+	ldy #>color1
+	jsr loadraw
+
+
+	lda #$00
+	sta memcpyDst
+	lda #$08
+	sta memcpyDst+1
+
+	lda #$0
+	sta memcpyLen
+	lda #$08
+	sta memcpyLen+1
+
+	lda #0
+	sta memcpySrc
+	lda #$c0
+	sta memcpySrc+1
+	jsr memcpy
+
+
+	ldx #1
+	lda tedvidoffs,x
+	clc
+	sta $ff12
+
+	ldx #<screen4
+	ldy #>screen4
+	jsr loadraw
+
+	ldx #<color2
+	ldy #>color2
+	jsr loadraw
+
+	ldx #<color3
+	ldy #>color3
+	jsr loadraw
+
+	ldx #<color4
+	ldy #>color4
+	jsr loadraw
+
+		    lda #%00110000 ; mc, bitmap
+			sta $ff06
+
+dotalk2:
 	lda frame
 	cmp #6
 	bne no_switch3
@@ -259,14 +295,6 @@ check:
 	jmp no_switch
 no_switch2:
 
-	lda rnd
-	and #3
-	clc
-	tax
-	lda tedvidoffs,x
-	clc
-	sta $ff12
-
 	lda #$00
 	sta memcpyDst
 	lda #$08
@@ -276,6 +304,17 @@ no_switch2:
 	sta memcpyLen
 	lda #$08
 	sta memcpyLen+1
+
+	lda rnd
+	and #3
+	clc
+	adc #1
+	tax
+	lda tedvidoffs,x
+	clc
+	sta $ff12
+
+	dex
 
 	cpx #0
 	beq tf1
@@ -290,28 +329,28 @@ no_switch2:
 tf1:
 	lda #0
 	sta memcpySrc
-	lda #$a0
+	lda #$c0
 	sta memcpySrc+1
 	jsr memcpy
 	jmp no_switch
 tf2:
 	lda #0
 	sta memcpySrc
-	lda #$a8
+	lda #$c8
 	sta memcpySrc+1
 	jsr memcpy
 	jmp no_switch
 tf3:
 	lda #0
 	sta memcpySrc
-	lda #$b0
+	lda #$d0
 	sta memcpySrc+1
 	jsr memcpy
 	jmp no_switch
 tf4:
 	lda #0
 	sta memcpySrc
-	lda #$b8
+	lda #$d8
 	sta memcpySrc+1
 	jsr memcpy
 	jmp no_switch
@@ -417,3 +456,61 @@ tedvidoffs: .byte 8,16,24,32,40,48
 
 .res $2800 - *
 .incbin "../../build/install-c16.prg", 2
+
+
+filename1:  .asciiz "signcol"
+filename2:  .asciiz "sign"
+
+screen1: .asciiz  "screen1"
+screen2: .asciiz  "screen2"
+screen3: .asciiz  "screen3"
+screen4: .asciiz  "screen4"
+
+color1: .asciiz  "color1"
+color2: .asciiz  "color2"
+color3: .asciiz  "color3"
+color4: .asciiz  "color4"
+
+ptr: .word 0
+
+partpattlen: .byte 5,7,5,7 
+partpattextra: .byte 240,255,128,255
+demoparts: .word dosign, dotalk, dosign, dotalk
+
+signinit: .byte 0
+
+partframes: .byte 0
+partpatts: .byte 0
+demopart: .byte 0
+
+wordval: .word $0878
+
+xl1: .byte 23,23,23,23,23,23,29,29,29,29,29,29,23,23,23,23,23,23
+
+xl2: .byte 17,17,17,17,17,17,11,11,11,11,11,11,17,17,17,17,17,17
+
+x1: .byte 0
+x2: .byte 0 
+xt: .byte 0
+
+lumavals: .byte 32,64,128,82,14,55,191
+
+pixbuf: ; gradient
+	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,110,110,110,110,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,0,0,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,40,40,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,40,40,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,40,40,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,42,42,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	.byte 0,0,0,0,0,0,0,0,0,0,0,110,110,110,110,110,110,110,0,48,48,0,110,110,110,110,110,110,110,0,0,0,0,0,0,0,0,0,0,0
+	.byte 0,0,0,0,0,0,0,0,0,0,0,110,0,0,0,0,0,0,65,65,65,65,0,0,0,0,0,0,110,0,0,0,0,0,0,0,0,0,0,0
+	.byte 0,0,0,0,0,0,0,0,0,0,0,110,0,40,40,40,42,48,65,123,123,65,48,42,40,40,40,0,110,0,0,0,0,0,0,0,0,0,0,0
+	.byte 0,0,0,0,0,0,0,0,0,0,0,110,0,40,40,40,42,48,65,123,123,65,48,42,40,40,40,0,110,0,0,0,0,0,0,0,0,0,0,0
+	.byte 0,0,0,0,0,0,0,0,0,0,0,110,0,0,0,0,0,0,65,65,65,65,0,0,0,0,0,0,110,0,0,0,0,0,0,0,0,0,0,0
+	.byte 0,0,0,0,0,0,0,0,0,0,0,110,110,110,110,110,110,110,0,48,48,0,110,110,110,110,110,110,110,0,0,0,0,0,0,0,0,0,0,0
+	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,42,42,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,40,40,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,40,40,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,40,40,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,0,0,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,110,110,110,110,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0

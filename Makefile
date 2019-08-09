@@ -108,8 +108,22 @@ LOADER_SRC   = ../../src
 LOADER       = $(BUILDDIR)/loader-$(_PLATFORM_).prg
 
 RESOURCESDIR = ../resources
-PIC1         = signcol.bin
-PIC2         = sign.bin
+SIGNC        = signcol.bin
+SIGN         = sign.bin
+
+SCREEN1		 = screen1.bin
+SCREEN2		 = screen2.bin
+SCREEN3		 = screen3.bin
+SCREEN4		 = screen4.bin
+
+SCREEN1C	= color1.bin
+SCREEN2C	= color2.bin
+SCREEN3C	= color3.bin
+SCREEN4C	= color4.bin
+
+
+HALP		 = halp.bin
+HALPC		 = halp.bin
 
 NAME         = minexample
 
@@ -147,11 +161,19 @@ endif
 diskimage: $(DISKIMAGE)
 
 $(DISKIMAGE): $(ASSEMBLE) $(PIC1) $(PIC2)
-	$(C1541) -format "normal is boring,+h" d64 $@
+	$(C1541) -format "pretending to be,qt" d64 $@
 	$(C1541) -attach $@ \
 	 -write $(ASSEMBLE) "$(NAME)" \
-	 -write $(PIC1) "signcol" \
-	 -write $(PIC2) "sign"
+	 -write $(SIGNC) "signcol" \
+	 -write $(SIGN) "sign" \
+	 -write $(SCREEN1) "screen1" \
+	 -write $(SCREEN1C) "color1" \
+	 -write $(SCREEN2) "screen2" \
+	 -write $(SCREEN2C) "color2" \
+	 -write $(SCREEN3) "screen3" \
+	 -write $(SCREEN3C) "color3" \
+	 -write $(SCREEN4) "screen4" \
+	 -write $(SCREEN4C) "color4"
 
 
 ifneq ($(USE_YAPE),0)
