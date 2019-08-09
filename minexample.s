@@ -97,7 +97,6 @@ error:      ldx #COLOUR_BLACK
 
 dosign:
 	lda #0
-	sta $ff19 ; border
 	sta talkinit
 
 	lda signinit
@@ -159,7 +158,7 @@ signxloop:
 	; kierto
 	clc
 	adc frame
-	and #64
+	and frame3
 
 signadd:
 	sta $0878,x
@@ -368,6 +367,18 @@ irq_vector:
 
 	inc frame
 
+	inc frame2
+	lda frame2
+	cmp #128
+	bne notframe2
+	lda frame3
+	clc
+	adc #8
+	sta frame3
+	lda #0
+	sta frame2
+notframe2:
+
 	inc partframes
 
 	lda partframes
@@ -443,6 +454,8 @@ memcpyEnd:
 	rts
 
 frame: .byte 0
+frame2: .byte 0
+frame3: .byte 0
 animframe: .byte 0
 tedvidoffs: .byte 8,16,24,32,40,48
 
