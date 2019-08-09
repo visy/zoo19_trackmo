@@ -21,7 +21,7 @@ zero_bits  = COLOUR_MEDIUMGREY
 
 			lda #0
 			sta $ff15
-
+			sta $ff19 ; border
 
 		    lda #%00100000 ; screen off
 			sta $ff06
@@ -287,12 +287,11 @@ check:
 
 	inc animframe
 	lda animframe
-	cmp #4
-	bne no_switch2
+	cmp #2
+	bne no_switch
 	lda #0
 	sta animframe
 
-	jmp no_switch
 no_switch2:
 
 	lda #$00
