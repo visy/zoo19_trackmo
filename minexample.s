@@ -255,6 +255,9 @@ dotalk:
 	clc
 	sta $ff12
 
+		    lda #%00110000 ; mc, bitmap
+			sta $ff06
+
 	ldx #<screen4
 	ldy #>screen4
 	jsr loadraw
@@ -270,9 +273,6 @@ dotalk:
 	ldx #<color4
 	ldy #>color4
 	jsr loadraw
-
-		    lda #%00110000 ; mc, bitmap
-			sta $ff06
 
 dotalk2:
 	lda frame
