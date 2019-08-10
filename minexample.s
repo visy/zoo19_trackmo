@@ -319,14 +319,12 @@ dotalk3:
 	jmp dotalk2
 
 talkinitor:
-	lda #1
-	sta talkinit
 
     lda #%00100000 ; screen off
 	sta $ff06
 
-	ldx #<color2
-	ldy #>color2
+	ldx #<color4
+	ldy #>color4
 	jsr loadraw
 
 	lda #$00
@@ -344,7 +342,7 @@ talkinitor:
 	sta memcpySrc+1
 	jsr memcpy
 
-	ldx #2
+	ldx #4
 	lda tedvidoffs,x
 	clc
 	sta $ff12
@@ -352,8 +350,6 @@ talkinitor:
     lda #%00110000 ; no blank, bitmap
 	sta $ff06
 
-	lda #0
-	sta frame
 
 			ldx #<color1
 			ldy #>color1
@@ -439,6 +435,13 @@ talkinitor:
 	ldy #>screen1
 	jsr loadcompd
 
+	lda #0
+	sta frame
+
+	lda #1
+	sta talkinit
+
+	jmp mainloop
 
 dotalk2:
 	lda frame
