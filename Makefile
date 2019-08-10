@@ -108,10 +108,10 @@ LOADER_SRC   = ../../src
 LOADER       = $(BUILDDIR)/loader-$(_PLATFORM_).prg
 
 RESOURCESDIR = ../resources
-SIGNC        = signcol.bin
-SIGN         = sign.bin
+SIGNC        = signcol.tc
+SIGN         = sign.tc
 
-SCREEN1		 = screen1.bin
+SCREEN1		 = screen1.tc
 SCREEN2		 = screen2.bin
 SCREEN3		 = screen3.bin
 SCREEN4		 = screen4.bin
@@ -124,8 +124,8 @@ SCREEN4C	= color4.bin
 HALP		 = halp.bin
 HALPC		 = halp.bin
 
-QUADCO		= quadco.bin
-QUADSC		= quadsc.bin
+QUADCO		= quadco.tc
+QUADSC		= quadsc.tc
 
 NAME         = minexample
 

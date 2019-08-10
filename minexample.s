@@ -19,7 +19,6 @@ zero_bits  = COLOUR_MEDIUMGREY
 
 			sta $ff3e
 
-
 			lda #0
 			sta $ff15
 			sta $ff19 ; border
@@ -29,6 +28,7 @@ zero_bits  = COLOUR_MEDIUMGREY
 
 		    lda #%00011000 ; mc
 			sta $ff07
+
 
 			lda #%00000000 ; screen at 4*$400
 			sta $ff13
@@ -40,34 +40,108 @@ zero_bits  = COLOUR_MEDIUMGREY
 
 			ldx #<quadco
 			ldy #>quadco
-			jsr loadraw
+			jsr loadcompd
 
 			ldx #<quadsc
 			ldy #>quadsc
-			jsr loadraw
+			jsr loadcompd
+
+			lda #0
+			sta memcpySrc
+			lda #$40
+			sta memcpySrc+1
+
+			lda #$00
+			sta memcpyDst
+			lda #$a0
+			sta memcpyDst+1
+
+			lda #$0
+			sta memcpyLen
+			lda #$20
+			sta memcpyLen+1
+			jsr memcpy
+
 
 			ldx #4
 			lda tedvidoffs,x
 			clc
 			sta $ff12
 
-		    lda #%00110000 ; no blank, bitmap
-			sta $ff06
-
 		    lda #%00001000 ; hires
 			sta $ff07
 
-			ldx #<screen1
-			ldy #>screen1
-			jsr loadraw
+		    lda #%00110000 ; no blank, bitmap
+			sta $ff06
 
 			ldx #<screen2
 			ldy #>screen2
 			jsr loadraw
 
+			lda #0
+			sta memcpySrc
+			lda #$40
+			sta memcpySrc+1
+
+			lda #$00
+			sta memcpyDst
+			lda #$60
+			sta memcpyDst+1
+
+			lda #$0
+			sta memcpyLen
+			lda #$20
+			sta memcpyLen+1
+			jsr memcpy
+
 			ldx #<screen3
 			ldy #>screen3
 			jsr loadraw
+
+			lda #0
+			sta memcpySrc
+			lda #$40
+			sta memcpySrc+1
+
+			lda #$00
+			sta memcpyDst
+			lda #$80
+			sta memcpyDst+1
+
+			lda #$0
+			sta memcpyLen
+			lda #$20
+			sta memcpyLen+1
+			jsr memcpy
+
+			ldx #<screen4
+			ldy #>screen4
+			jsr loadraw
+
+		    lda #%00100000 ; screen off
+			sta $ff06
+
+			lda #0
+			sta memcpySrc
+			lda #$40
+			sta memcpySrc+1
+
+			lda #$00
+			sta memcpyDst
+			lda #$a0
+			sta memcpyDst+1
+
+			lda #$0
+			sta memcpyLen
+			lda #$20
+			sta memcpyLen+1
+
+			jsr memcpy
+
+
+
+
+			sei
 
 		    lda #<irq_vector    ; Set IRQ vector to be called
 		    sta $0314           ; Once per screen refresh
@@ -111,21 +185,28 @@ dosign:
 	lda signinit
 	cmp #1
 	beq signdone
-	ldx #5
+
+
+    ldx #<filename2
+    ldy #>filename2
+    jsr loadcompd
+
+    lda #%00100000 ; screen off
+	sta $ff06
+
+    ldx #<filename1
+    ldy #>filename1
+    jsr loadcompd
+
+	ldx #1
 	lda tedvidoffs,x
 	clc
 	sta $ff12
 
     lda #%00011000 ; mc
 	sta $ff07
-
-    ldx #<filename2
-    ldy #>filename2
-    jsr loadraw
-
-    ldx #<filename1
-    ldy #>filename1
-    jsr loadraw
+    lda #%00110000 ; no blank, bitmap
+	sta $ff06
 
 	lda #1
 	sta signinit
@@ -230,19 +311,23 @@ dotalk:
 
 	lda talkinit
 	cmp #1
-	beq dotalk2
+	beq dotalk3
+	jmp talkinitor
 
+
+dotalk3:
+	jmp dotalk2
+
+talkinitor:
 	lda #1
 	sta talkinit
 
-		    lda #%00100000 ; screen off
-			sta $ff06
+    lda #%00100000 ; screen off
+	sta $ff06
 
-
-	ldx #<color1
-	ldy #>color1
+	ldx #<color2
+	ldy #>color2
 	jsr loadraw
-
 
 	lda #$00
 	sta memcpyDst
@@ -253,37 +338,107 @@ dotalk:
 	sta memcpyLen
 	lda #$08
 	sta memcpyLen+1
-
 	lda #0
 	sta memcpySrc
-	lda #$c0
+	lda #$40
 	sta memcpySrc+1
 	jsr memcpy
 
-
-	ldx #1
+	ldx #2
 	lda tedvidoffs,x
 	clc
 	sta $ff12
 
-		    lda #%00110000 ; mc, bitmap
-			sta $ff06
+    lda #%00110000 ; no blank, bitmap
+	sta $ff06
 
-	ldx #<screen4
-	ldy #>screen4
-	jsr loadraw
+	lda #0
+	sta frame
 
-	ldx #<color2
-	ldy #>color2
-	jsr loadraw
+			ldx #<color1
+			ldy #>color1
+			jsr loadraw
 
-	ldx #<color3
-	ldy #>color3
-	jsr loadraw
+			lda #$00
+			sta memcpyDst
+			lda #$c0
+			sta memcpyDst+1
 
-	ldx #<color4
-	ldy #>color4
-	jsr loadraw
+			lda #$0
+			sta memcpyLen
+			lda #$08
+			sta memcpyLen+1
+
+			lda #0
+			sta memcpySrc
+			lda #$40
+			sta memcpySrc+1
+			jsr memcpy
+
+			ldx #<color2
+			ldy #>color2
+			jsr loadraw
+
+			lda #$00
+			sta memcpyDst
+			lda #$c8
+			sta memcpyDst+1
+
+			lda #$0
+			sta memcpyLen
+			lda #$08
+			sta memcpyLen+1
+
+			lda #0
+			sta memcpySrc
+			lda #$40
+			sta memcpySrc+1
+			jsr memcpy
+
+			ldx #<color3
+			ldy #>color3
+			jsr loadraw
+
+			lda #$00
+			sta memcpyDst
+			lda #$d0
+			sta memcpyDst+1
+
+			lda #$0
+			sta memcpyLen
+			lda #$08
+			sta memcpyLen+1
+
+			lda #0
+			sta memcpySrc
+			lda #$40
+			sta memcpySrc+1
+			jsr memcpy
+
+			ldx #<color4
+			ldy #>color4
+			jsr loadraw
+
+			lda #$00
+			sta memcpyDst
+			lda #$d8
+			sta memcpyDst+1
+
+			lda #$0
+			sta memcpyLen
+			lda #$08
+			sta memcpyLen+1
+
+			lda #0
+			sta memcpySrc
+			lda #$40
+			sta memcpySrc+1
+			jsr memcpy2
+
+	ldx #<screen1
+	ldy #>screen1
+	jsr loadcompd
+
 
 dotalk2:
 	lda frame
@@ -436,7 +591,7 @@ next_rnd:
 memcpy:
 	sei
 	sta $ff3f
-
+memcpy2:
 	ldy #0
 	lda #0
 	ldx memcpyLen+1
@@ -541,3 +696,4 @@ pixbuf: ; gradient
 	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,40,40,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,0,0,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,110,110,110,110,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+

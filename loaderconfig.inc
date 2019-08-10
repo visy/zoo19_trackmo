@@ -12,7 +12,7 @@ PLATFORM                           = diskio::platform::COMMODORE_16; available a
 
 ; parameter, this changes the host-side code only
 
-DECOMPRESSOR                       = DECOMPRESSORS::NONE; available are NONE, BITNAX (recommended for demos), BYTEBOOZER2, DOYNAX_LZ, EXOMIZER, LEVELCRUSH, NUCRUNCH, PUCRUNCH, SUBSIZER, TINYCRUNCH (recommended for demos)
+DECOMPRESSOR                       = DECOMPRESSORS::TINYCRUNCH; available are NONE, BITNAX (recommended for demos), BYTEBOOZER2, DOYNAX_LZ, EXOMIZER, LEVELCRUSH, NUCRUNCH, PUCRUNCH, SUBSIZER, TINYCRUNCH (recommended for demos)
 
 LC_SPEED                           = 6 ; Taboo Levelcrush speed, irrelevant if using any other or no compressor
 
@@ -25,7 +25,7 @@ LC_SPEED                           = 6 ; Taboo Levelcrush speed, irrelevant if u
 
 ; basic features, different settings can be run with the same installed drive code, increase host-side code size
 
-.define LOAD_COMPD_API             0 ; include the loadcompd routine to load and depack compressed files on the fly
+.define LOAD_COMPD_API             1 ; include the loadcompd routine to load and depack compressed files on the fly
                                      ; requires DECOMPRESSOR != DECOMPRESSORS::NONE
 
 .define LOAD_RAW_API               1 ; include the loadraw routine to load files without decompressing
@@ -40,7 +40,7 @@ LC_SPEED                           = 6 ; Taboo Levelcrush speed, irrelevant if u
 
 ; extended features, different settings can be run with the same installed drive code, increase host-side code size
 
-.define LOAD_UNDER_D000_DFFF       0 ; C-64 only: enable loading (and decompression) to the RAM at $D000-$DFFF,
+.define LOAD_UNDER_D000_DFFF       1 ; C-64 only: enable loading (and decompression) to the RAM at $D000-$DFFF,
                                      ; the IRQ handlers will need to change $01 to enable the I/O-RAM at $D000..$DFFF,
                                      ; so make sure the IRQ handlers restore the $01 status to the value as when they are called.
                                      ; the IRQs must run via $FFFE/F, since the ROM is disabled when accessing the RAM at $D000-$DFFF
