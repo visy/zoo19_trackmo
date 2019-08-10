@@ -1,0 +1,99 @@
+make -C ../../src EXTCONFIGPATH=../samples/minexample INSTALL=2800 RESIDENT=2000 ZP=02 prg
+make[1]: Entering directory '/mnt/d/dev/c16work/loader/src'
+mkdir ./../build/interm
+make -C ./.. version.inc
+make[2]: Entering directory '/mnt/d/dev/c16work/loader'
+make[2]: Nothing to be done for 'version.inc'.
+make[2]: Leaving directory '/mnt/d/dev/c16work/loader'
+ca65 --cpu 6502X  -t c16 -D PLATFORM=16 -I ./. -I ./../../shared -I ./../include -D EXTCONFIGPATH -I ../samples/minexample -D RESIADDR=0x2000 -o ../build/interm/loader-nonreloc-c16.o resident.s
+ca65 --cpu 6502X  -t c16 -D PLATFORM=16 -I ./. -I ./../../shared -I ./../include -D EXTCONFIGPATH -I ../samples/minexample -D INSTADDR=0x2800 -o ../build/interm/install-nonreloc-c16.o install.s
+perl -e 'printf "MEMORY\
+{\
+ ZPRAM: start = \$02, size = \$%x;\
+ INSTALLRAM: start = \$%x, size = \$%x, file = \"../build/install-c16.prg\";\
+ RESIDENTRAM: start = \$%x, size = \$%x, file = \"../build/loader-c16.prg\";\
+}\
+\
+SEGMENTS\
+{\
+ DISKIO_ZP: load = ZPRAM, type = zp;\
+ DISKIO: load = RESIDENTRAM;\
+ DISKIO_INSTALL: load = INSTALLRAM;\
+}", 0x0100 - 0x02, 0x2800 - 2, 0x10002 - 0x2800, 0x2000 - 2, 0x10002 - 0x2000' > ../build/interm/binary.link
+ld65 -C ./../build/interm/binary.link -vm -m ./../build/interm/loader-c16.map ./../build/interm/loader-nonreloc-c16.o ./../build/interm/install-nonreloc-c16.o
+rm -f a.out
+perl make-loadersymbolsinc.pl ../build/interm/loader-c16.map > ../build/loadersymbols-c16.inc
+Usage: make prg INSTALL=<install hexaddress> RESIDENT=<resident hexaddress> ZP=<zp hexaddress>
+INSTALL=$2800
+RESIDENT=$2000
+ZP=$02
+cat ./../build/loadersymbols-c16.inc
+; build command:
+; make prg INSTALL=2800 RESIDENT=2000 ZP=02
+
+; configuration
+config_DECOMPRESSOR             = $08
+config_DIRTRACK                 = $12
+config_DISABLE_WATCHDOG         = $00
+config_END_ADDRESS_API          = $00
+config_FILENAME_MAXLENGTH       = $10
+config_IDLE_BUS_LOCK            = $00
+config_LC_SPEED                 = $06
+config_LOAD_COMPD_API           = $01
+config_LOAD_RAW_API             = $01
+config_LOAD_TO_API              = $00
+config_LOAD_UNDER_D000_DFFF     = $01
+config_LOAD_VIA_KERNAL_FALLBACK = $00
+config_MEM_DECOMP_API           = $00
+config_MEM_DECOMP_TO_API        = $00
+config_NTSC_COMPATIBILITY       = $00
+config_ONLY_1541_AND_COMPATIBLE = $01
+config_UNINSTALL_API            = $00
+
+; zeropage
+loadaddrlo                      = $02
+loader_zp_first                 = $02
+loadaddrhi                      = $03
+decdestlo                       = $04
+decdesthi                       = $05
+loader_zp_last                  = $17
+
+; resident
+loadraw                         = $2000
+loadcompd                       = $200b
+openfile                        = $202b
+pollblock                       = $208b
+decrunch                        = $21a2
+
+; install
+drivecode41                     = $2800
+install                         = $2fdf
+make[1]: Leaving directory '/mnt/d/dev/c16work/loader/src'
+mkdir -p ../../build
+mkdir -p ../../build/interm
+cl65 -Wa -I../../../shared -I ../../include --cpu 6502X  -t c16 -Wa -DPLATFORM=16 -o ../../build/interm/minexample-uncompressed-c16.prg minexample.s
+c1541 -format "pretending to be,qt" d64 ../../build/minexample-c16.d64
+formatting in unit 8 ...
+c1541 -attach ../../build/minexample-c16.d64 \
+ -write ../../build/interm/minexample-uncompressed-c16.prg "minexample" \
+ -write signcol.bin "signcol" \
+ -write sign.tc "sign" \
+ -write screen1.bin "screen1" \
+ -write color1.bin "color1" \
+ -write screen2.bin "screen2" \
+ -write color2.bin "color2" \
+ -write screen3.bin "screen3" \
+ -write color3.bin "color3" \
+ -write screen4.bin "screen4" \
+ -write color4.bin "color4"
+writing file `MINEXAMPLE-UNCOMPRESSED-C16.PRG' as `MINEXAMPLE' to unit 8
+writing file `SIGNCOL.BIN' as `SIGNCOL' to unit 8
+writing file `SIGN.TC' as `SIGN' to unit 8
+writing file `SCREEN1.BIN' as `SCREEN1' to unit 8
+writing file `COLOR1.BIN' as `COLOR1' to unit 8
+writing file `SCREEN2.BIN' as `SCREEN2' to unit 8
+writing file `COLOR2.BIN' as `COLOR2' to unit 8
+writing file `SCREEN3.BIN' as `SCREEN3' to unit 8
+writing file `COLOR3.BIN' as `COLOR3' to unit 8
+writing file `SCREEN4.BIN' as `SCREEN4' to unit 8
+writing file `COLOR4.BIN' as `COLOR4' to unit 8

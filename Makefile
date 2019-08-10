@@ -121,9 +121,11 @@ SCREEN2C	= color2.bin
 SCREEN3C	= color3.bin
 SCREEN4C	= color4.bin
 
-
 HALP		 = halp.bin
 HALPC		 = halp.bin
+
+QUADCO		= quadco.bin
+QUADSC		= quadsc.bin
 
 NAME         = minexample
 
@@ -173,7 +175,9 @@ $(DISKIMAGE): $(ASSEMBLE) $(PIC1) $(PIC2)
 	 -write $(SCREEN3) "screen3" \
 	 -write $(SCREEN3C) "color3" \
 	 -write $(SCREEN4) "screen4" \
-	 -write $(SCREEN4C) "color4"
+	 -write $(SCREEN4C) "color4" \
+	 -write $(QUADCO) "quadco" \
+	 -write $(QUADSC) "quadsc"
 
 
 ifneq ($(USE_YAPE),0)

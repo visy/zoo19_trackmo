@@ -19,6 +19,7 @@ zero_bits  = COLOUR_MEDIUMGREY
 
 			sta $ff3e
 
+
 			lda #0
 			sta $ff15
 			sta $ff19 ; border
@@ -26,7 +27,35 @@ zero_bits  = COLOUR_MEDIUMGREY
 		    lda #%00100000 ; screen off
 			sta $ff06
 
+		    lda #%00011000 ; mc
+			sta $ff07
+
+			lda #%00000000 ; screen at 4*$400
+			sta $ff13
+
+			lda #%00001000 ; vidram at $0800
+			sta $ff14
+
 	        jsr install
+
+			ldx #<quadco
+			ldy #>quadco
+			jsr loadraw
+
+			ldx #<quadsc
+			ldy #>quadsc
+			jsr loadraw
+
+			ldx #4
+			lda tedvidoffs,x
+			clc
+			sta $ff12
+
+		    lda #%00110000 ; no blank, bitmap
+			sta $ff06
+
+		    lda #%00001000 ; hires
+			sta $ff07
 
 			ldx #<screen1
 			ldy #>screen1
@@ -50,28 +79,8 @@ zero_bits  = COLOUR_MEDIUMGREY
 
 		    cli                 ; Enable interrupts again
 
-			lda #0
-			sta $ff19 ; border
 
 
-		    lda #%00110000 ; mc, bitmap
-			sta $ff06
-
-		    lda #%00011000
-			sta $ff07
-
-			lda #%00001000
-			sta $ff12
-
-			lda #%00000000 ; screen at 4*$400
-			sta $ff13
-
-			lda #%00001000 ; vidram at $0800
-			sta $ff14
-
-		 	lda #0
-		 	sta $ff15 ; bgcolor
-			sta $ff3e
 
 
 mainloop:
@@ -106,6 +115,9 @@ dosign:
 	lda tedvidoffs,x
 	clc
 	sta $ff12
+
+    lda #%00011000 ; mc
+	sta $ff07
 
     ldx #<filename2
     ldy #>filename2
@@ -482,6 +494,9 @@ color1: .asciiz  "color1"
 color2: .asciiz  "color2"
 color3: .asciiz  "color3"
 color4: .asciiz  "color4"
+
+quadco: .asciiz "quadco"
+quadsc: .asciiz "quadsc"
 
 ptr: .word 0
 
