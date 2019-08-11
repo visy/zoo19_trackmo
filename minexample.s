@@ -175,6 +175,132 @@ error:      ldx #COLOUR_BLACK
             stx BORDERCOLOUR
             jmp :-
 
+logoinit: .byte 0
+
+dologo:
+	lda logoinit
+	cmp #1
+	beq dologo2
+
+
+    lda #%00100000 ; screen off
+	sta $ff06
+
+	lda #$0
+	sta $ff19 ; border
+ 	sta $ff15 ; bgcolor
+
+    lda #%00010000 ; ted stop
+	sta $ff07 ; ted stop
+
+	ldx #<logoco
+	ldy #>logoco
+	jsr loadcompd
+
+	ldx #<logosc
+	ldy #>logosc
+	jsr loadcompd
+
+
+	lda #$d0
+	sta $ff12
+
+    lda #8 ; mc
+	sta $ff07
+    lda #$3b ; no blank, bitmap
+	sta $ff06
+
+	lda #1
+	sta logoinit
+
+dologo2:
+
+	lda logoinit
+	cmp #2
+	beq nologofade
+
+	ldy #200
+yloop:
+	lda #11
+	clc
+    sbc partframes2
+    ror
+    ror
+    ror
+    sta x1
+
+	lda $ff1e
+	and #7
+	and x1
+	sta x2
+	lda #0
+	clc
+	adc x2
+	sta $ff07
+
+logowiper:
+
+donelogoy:
+
+	dey
+	cpy #0
+	bne yloop
+
+nologofade:
+
+	lda partpatts
+	cmp #1
+	bne nologowipe
+
+
+	inc logowipe2
+	lda logowipe2
+	cmp #48
+	bne nologowipe
+
+	inc logowipe
+
+	lda #0
+	sta logowipe2
+
+	ldx #00
+nologowipe2:
+	txa
+	tay
+	ldx logowipe
+	lda fadetab,x
+	cmp #0
+	bne nologoblank
+
+    lda #%00100000 ; screen off
+	sta $ff06
+
+nologoblank:
+
+
+	sta x1
+	tya
+	tax
+	lda x1
+	sta $0800,x
+	sta $0900,x
+	sta $0a00,x
+	sta $0b00,x
+
+	inx
+	cpx #0
+	bne nologowipe2
+
+nologowipe:
+
+	jmp mainloop
+
+fadetab: .byte $ef,$ee,$dd,$cc,$bb,$aa,$99,$88,$00,$00,$00,$00,$00,$00
+
+logowipe: .byte 0
+logowipe2: .byte 0
+
+
 patientinit: .byte 0
 
 dopatient:
@@ -215,6 +341,24 @@ dopatient:
 	sta patientinit
 
 dopatient2:
+	ldy #200
+yloop2:
+	lda #2
+    sta x1
+
+	lda $ff1e
+	and #7
+	and x1
+	sta x2
+	lda #0
+	clc
+	adc x2
+	sta $ff07
+
+	dey
+	cpy #0
+	bne yloop2
+
 
 	jmp mainloop
 
@@ -226,13 +370,12 @@ dosign:
 	cmp #1
 	beq signdone
 
+    lda #%00100000 ; screen off
+	sta $ff06
 
     ldx #<filename2
     ldy #>filename2
     jsr loadcompd
-
-    lda #%00100000 ; screen off
-	sta $ff06
 
     ldx #<filename1
     ldy #>filename1
@@ -597,6 +740,15 @@ irq_vector:
 	sta frame2
 notframe2:
 
+	inc partframes3
+	lda partframes3
+	cmp #8
+	bne nopf3
+	lda #0
+	sta partframes3
+	inc partframes2
+nopf3:
+
 	inc partframes
 
 	lda partframes
@@ -707,15 +859,22 @@ quadco: .asciiz "quadco"
 halpsc: .asciiz "halpsc"
 halpco: .asciiz "halpco"
 
+logosc: .asciiz "logosc"
+logoco: .asciiz "logoco"
+
+
 ptr: .word 0
 
-partpattlen: .byte 5,3,4,8
-partpattextra: .byte 240,255,128,255
-demoparts: .word dosign, dopatient, dotalk, dosign
+partpattlen: .byte 2,4,3,4,8
+partpattextra: .byte 240,255,128,255,255
+demoparts: .word dologo, dosign, dopatient, dotalk, dosign
 
 signinit: .byte 0
 
 partframes: .byte 0
+partframes2: .byte 0
+partframes3: .byte 0
+
 partpatts: .byte 0
 demopart: .byte 0
 

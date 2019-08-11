@@ -179,7 +179,10 @@ $(DISKIMAGE): $(ASSEMBLE) $(PIC1) $(PIC2)
 	 -write $(QUADSC) "quadsc" \
 	 -write $(QUADCO) "quadco" \
 	 -write $(HALPSC) "halpsc" \
-	 -write $(HALPCO) "halpco" 
+	 -write $(HALPCO) "halpco" \
+	 -write "logosc.tc" "logosc" \
+	 -write "logoco.tc" "logoco"
+	 
 
 
 ifneq ($(USE_YAPE),0)
