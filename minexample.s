@@ -26,15 +26,14 @@ zero_bits  = COLOUR_MEDIUMGREY
 		    lda #%00100000 ; screen off
 			sta $ff06
 
-		    lda #%00011000 ; mc
-			sta $ff07
-
-
 			lda #%00000000 ; screen at 4*$400
 			sta $ff13
 
 			lda #%00001000 ; vidram at $0800
 			sta $ff14
+
+		    lda #%00010000 ; ted stop
+			sta $ff07 ; ted stop
 
 	        jsr install
 
@@ -68,7 +67,7 @@ zero_bits  = COLOUR_MEDIUMGREY
 			clc
 			sta $ff12
 
-		    lda #%00001000 ; hires
+		    lda #%00001000 ; hires ted on
 			sta $ff07
 
 		    lda #%00110000 ; no blank, bitmap
@@ -176,7 +175,48 @@ error:      ldx #COLOUR_BLACK
             stx BORDERCOLOUR
             jmp :-
 
-            
+patientinit: .byte 0
+
+dopatient:
+	lda patientinit
+	cmp #1
+	beq dopatient2
+
+
+    lda #%00100000 ; screen off
+	sta $ff06
+
+	lda #$f1
+	sta $ff19 ; border
+ 	sta $ff15 ; bgcolor
+
+    lda #%00010000 ; ted stop
+	sta $ff07 ; ted stop
+
+	ldx #<halpco
+	ldy #>halpco
+	jsr loadcompd
+
+	ldx #<halpsc
+	ldy #>halpsc
+	jsr loadcompd
+
+
+	lda #$d0
+	sta $ff12
+
+    lda #8 ; mc
+	sta $ff07
+    lda #$3b ; no blank, bitmap
+	sta $ff06
+
+
+	lda #1
+	sta patientinit
+
+dopatient2:
+
+	jmp mainloop
 
 dosign:
 	lda #0
@@ -323,6 +363,10 @@ talkinitor:
     lda #%00100000 ; screen off
 	sta $ff06
 
+	lda #$0
+ 	sta $ff15 ; bgcolor
+	sta $ff19 ; border
+
 	ldx #<color4
 	ldy #>color4
 	jsr loadraw
@@ -347,8 +391,12 @@ talkinitor:
 	clc
 	sta $ff12
 
+
+    lda #%00011000 ; mc
+	sta $ff07
     lda #%00110000 ; no blank, bitmap
 	sta $ff06
+
 
 
 			ldx #<color1
@@ -653,14 +701,17 @@ color2: .asciiz  "color2"
 color3: .asciiz  "color3"
 color4: .asciiz  "color4"
 
-quadco: .asciiz "quadco"
 quadsc: .asciiz "quadsc"
+quadco: .asciiz "quadco"
+
+halpsc: .asciiz "halpsc"
+halpco: .asciiz "halpco"
 
 ptr: .word 0
 
-partpattlen: .byte 5,7,5,7 
+partpattlen: .byte 5,3,4,8
 partpattextra: .byte 240,255,128,255
-demoparts: .word dosign, dotalk, dosign, dotalk
+demoparts: .word dosign, dopatient, dotalk, dosign
 
 signinit: .byte 0
 
