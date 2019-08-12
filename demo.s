@@ -56,21 +56,6 @@ zero_bits  = COLOUR_MEDIUMGREY
 		    lda #%00110000 ; no blank, bitmap
 			sta $ff06
 
-			ldx #<screen2
-			ldy #>screen2
-			jsr loadcompd
-
-			ldx #<screen3
-			ldy #>screen3
-			jsr loadcompd
-
-			ldx #<screen4
-			ldy #>screen4
-			jsr loadcompd
-
-		    lda #%00100000 ; screen off
-			sta $ff06
-
 		    lda #<irq_vector    ; Set IRQ vector to be called
 		    sta $FFFE           ; Once per screen refresh
 		    lda #>irq_vector
@@ -79,8 +64,19 @@ zero_bits  = COLOUR_MEDIUMGREY
 		    lda #$00
 		    jsr $1600           ; Initialize sid to play song 0
 
-		    cli                 ; Enable interrupts again
+			ldx #<logosc
+			ldy #>logosc
+			jsr loadcompd
 
+		    lda #%00100000 ; screen off
+			sta $ff06
+
+			ldx #<logoco
+			ldy #>logoco
+			jsr loadcompd
+
+
+		    cli                 ; Enable interrupts again
 
 
 
@@ -122,13 +118,7 @@ dologo:
     lda #%00010000 ; ted stop
 	sta $ff07 ; ted stop
 
-	ldx #<logoco
-	ldy #>logoco
-	jsr loadcompd
 
-	ldx #<logosc
-	ldy #>logosc
-	jsr loadcompd
 
 
 	lda #$d0
@@ -233,20 +223,52 @@ logowipe2: .byte 0
 patientinit: .byte 0
 
 dopatient:
+
 	lda patientinit
 	cmp #1
 	beq dopatient2
 
-
     lda #%00100000 ; screen off
 	sta $ff06
+
+    lda #%00011000 ; ted stop
+	sta $ff07 ; ted stop
+
+	;; extra 2 = show pill
+	ldx demopart
+	lda partpattextra,x
+	cmp #2
+	beq patientspecialinit
+
+	jmp patient0
+
+patientspecialinit:
+
+	lda #$00
+	sta $ff19 ; border
+	lda #$80
+ 	sta $ff15 ; bgcolor
+
+	ldx #<pillco
+	ldy #>pillco
+	jsr loadcompd
+
+
+	ldx #<pillsc
+	ldy #>pillsc
+	jsr loadcompd
+
+    lda #%00011000 ; mc
+	sta $ff07
+
+
+	jmp patmutual
+
+patient0:
 
 	lda #$f1
 	sta $ff19 ; border
  	sta $ff15 ; bgcolor
-
-    lda #%00010000 ; ted stop
-	sta $ff07 ; ted stop
 
 	ldx #<halpco
 	ldy #>halpco
@@ -256,12 +278,16 @@ dopatient:
 	ldy #>halpsc
 	jsr loadcompd
 
-
-	lda #$d0
-	sta $ff12
-
     lda #8 ; mc
 	sta $ff07
+
+patmutual:
+
+	ldx #1
+	lda tedvidoffs,x
+	clc
+	sta $ff12
+
     lda #$3b ; no blank, bitmap
 	sta $ff06
 
@@ -270,6 +296,13 @@ dopatient:
 	sta patientinit
 
 dopatient2:
+
+	ldx demopart
+	lda partpattextra,x
+	cmp #2
+	beq patientspecial
+
+
 	ldy #200
 yloop2:
 	lda #2
@@ -288,16 +321,13 @@ yloop2:
 	cpy #0
 	bne yloop2
 
-
+patientspecial:
 	jmp mainloop
 
-signcolors: .byte $5c,$1b,$7a,$d3,0
+signcolors: .byte $5c,$1b,$7a,$d3,$5c,$1b,$7a,$d3,0
 signcolor: .byte 0
 
 dosign:
-	lda #0
-	sta talkinit
-
 	lda signinit
 	cmp #1
 	beq signdone
@@ -307,6 +337,9 @@ dosign:
 
 	lda #0
 	sta $ff19
+	sta frame
+	lda #1
+	sta frame3
 
     ldx #<filename2
     ldy #>filename2
@@ -315,6 +348,10 @@ dosign:
     ldx #<filename1
     ldy #>filename1
     jsr loadcompd
+
+    lda #0
+    sta partpatts
+
 
 	ldx #1
 	lda tedvidoffs,x
@@ -359,8 +396,6 @@ signxloop:
 	clc
 	cpx x2
 	bcc nocross3
-
-	jsr next_rnd
 
 	ldy #0
 	lda (memcpyLen),y
@@ -452,12 +487,15 @@ signyexit:
 
 talkinit: .byte 0
 
-dotalk:
+dotalkandrun:
 	lda #0
 	sta signinit
+	sta patientinit
 ;;;;;;;;;;;;;;; talk anim
 	lda talkinit
 	cmp #1
+	beq dotalk3
+	cmp #3
 	beq dotalk3
 	jmp talkinitor
 
@@ -468,28 +506,61 @@ dotalk3:
 
 talkinitor:
 
+
+    lda #%00100000 ; screen off
+	sta $ff06
+
+	lda talkinit
+	cmp #0
+	beq initrun
+
 	lda #$0
  	sta $ff15 ; bgcolor
  	lda #$6c
 	sta $ff19 ; border
 
-    lda #%00100000 ; screen off
-	sta $ff06
-
-
 	ldx #<talkco
 	ldy #>talkco
 	jsr loadcompd
 
-	ldx #<screen1
-	ldy #>screen1
+
+	ldx #<talksc
+	ldy #>talksc
 	jsr loadcompd
 
 	lda #0
 	sta frame
 
-	lda #1
-	sta talkinit
+	inc talkinit
+
+	jmp runinitdone
+
+initrun:
+
+	lda #$f1
+	sta $ff19 ; border
+	lda #$0
+ 	sta $ff15 ; bgcolor
+
+	ldx #<runco
+	ldy #>runco
+	jsr loadcompd
+
+	ldx #<runsc
+	ldy #>runsc
+	jsr loadcompd
+
+
+
+	lda #0
+	sta frame
+	inc talkinit
+
+	jmp runinitdone
+
+norun:
+
+
 
 dotalk2:
 	lda frame
@@ -505,11 +576,13 @@ check:
 	inc animframe
 	lda animframe
 	cmp #2
-	bne no_switch
+	bne no_switch3
 	lda #0
 	sta animframe
 
 no_switch2:
+
+runinitdone:
 
 	lda #$00
 	sta memcpyDst
@@ -521,15 +594,33 @@ no_switch2:
 	lda #$08
 	sta memcpyLen+1
 
+	lda talkinit
+	cmp #1
+	beq runlogic
+
 	lda rnd
 	and #3
 	clc
-	adc #1
+	adc #2
 	tax
+
+	jmp talklogicdone
+
+runlogic:
+
+	lda partframes2
+	and #3
+	clc
+	adc #2
+	tax
+
+talklogicdone:
+
 	lda tedvidoffs,x
 	clc
 	sta $ff12
 
+	dex
 	dex
 
 	cpx #0
@@ -545,45 +636,173 @@ no_switch2:
 tf1:
 	lda #0
 	sta memcpySrc
-	lda #$c0
+	lda #$40
 	sta memcpySrc+1
 	jsr memcpy
 	jmp no_switch4
 tf2:
 	lda #0
 	sta memcpySrc
-	lda #$c8
+	lda #$48
 	sta memcpySrc+1
 	jsr memcpy
 	jmp no_switch4
 tf3:
 	lda #0
 	sta memcpySrc
-	lda #$d0
+	lda #$50
 	sta memcpySrc+1
 	jsr memcpy
 	jmp no_switch4
 tf4:
 	lda #0
 	sta memcpySrc
-	lda #$d8
+	lda #$58
 	sta memcpySrc+1
 	jsr memcpy
 	jmp no_switch4
 
 no_switch4:
+
+	lda talkinit
+	cmp #1
+	bne mctalk
+
+	lda #%00001000 ; hires ted on
+	sta $ff07
+
+	jmp no_switch
+mctalk:
     lda #%00011000 ; mc
 	sta $ff07
-    lda #%00110000 ; no blank, bitmap
-	sta $ff06
 
 no_switch:
+    lda #%00110000 ; no blank, bitmap
+	sta $ff06
 
 ;;;;;;;;;;;;;;; talk anim end
 	jmp mainloop
 
 
-irq_vector:
+
+rnd:  .byte 0
+
+next_rnd:
+	lda rnd
+	rol
+	rol
+	clc
+	adc rnd      ; A = RND * 5
+	clc
+	adc #17      ; A = RND * 5 + 17
+	sta rnd
+	rts
+
+; Copy operation is divided in two parts. N is the total length
+; * memcpyLong for N / 256 blocks
+; * memcpyShort for N % 256 remaining bytes
+memcpy:
+memcpy2:
+	ldy #0
+	lda #0
+	ldx memcpyLen+1
+	beq memcpyShort ; We need only the short version for <1 pages
+memcpyLoopLong: ; Copy X pages
+	lda (memcpySrc),y ; Loop unrolling can be done with confidence here
+	sta (memcpyDst),y ; any power of 2 will work
+	iny
+	bne memcpyLoopLong
+	dex
+	beq memcpyShort
+	inc memcpySrc+1 ; Go to the next page
+	inc memcpyDst+1
+	jmp memcpyLoopLong
+memcpyShort: ; Copy remaining bytes
+	ldx memcpyLen
+	beq memcpyEnd
+memcpyLoopShort: ; Copy X bytes
+	lda (memcpySrc),y
+	sta (memcpyDst),y
+	iny
+	dex
+	bne memcpyLoopShort
+memcpyEnd:
+	rts
+
+animframe: .byte 0
+tedvidoffs: .byte 8,16,24,32,40,48,56
+
+.res $1600 - *
+.incbin "music.bin"
+
+
+.res $2000 - *
+.incbin "../../build/loader-c16.prg", 2
+
+.res $2800 - *
+.incbin "../../build/install-c16.prg", 2
+
+
+filename1:  .asciiz "signcol"
+filename2:  .asciiz "sign"
+
+talksc: .asciiz  "talksc"
+talkco: .asciiz  "talkco"
+
+runsc: .asciiz  "runsc"
+runco: .asciiz  "runco"
+
+quadsc: .asciiz "quadsc"
+quadco: .asciiz "quadco"
+
+halpsc: .asciiz "halpsc"
+halpco: .asciiz "halpco"
+
+logosc: .asciiz "logosc"
+logoco: .asciiz "logoco"
+
+pillsc: .asciiz "pillsc"
+pillco: .asciiz "pillco"
+
+
+signinit: .byte 0
+
+
+wordval: .word $0878
+wordval2: .word $0c78
+
+xl1: .byte 23,23,23,23,23,23,29,29,29,29,29,29,23,23,23,23,23,23
+
+xl2: .byte 17,17,17,17,17,17,11,11,11,11,11,11,17,17,17,17,17,17
+
+x1: .byte 0
+x2: .byte 0 
+xt: .byte 0
+
+lumavals: .byte 32,64,128,82,14,55,191
+
+pixbuf: ; gradient
+	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,110,110,110,110,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,0,0,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,40,40,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,40,40,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,40,40,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,42,42,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	.byte 0,0,0,0,0,0,0,0,0,0,0,110,110,110,110,110,110,110,0,48,48,0,110,110,110,110,110,110,110,0,0,0,0,0,0,0,0,0,0,0
+	.byte 0,0,0,0,0,0,0,0,0,0,0,110,0,0,0,0,0,0,65,65,65,65,0,0,0,0,0,0,110,0,0,0,0,0,0,0,0,0,0,0
+	.byte 0,0,0,0,0,0,0,0,0,0,0,110,0,40,40,40,42,48,65,123,123,65,48,42,40,40,40,0,110,0,0,0,0,0,0,0,0,0,0,0
+	.byte 0,0,0,0,0,0,0,0,0,0,0,110,0,40,40,40,42,48,65,123,123,65,48,42,40,40,40,0,110,0,0,0,0,0,0,0,0,0,0,0
+	.byte 0,0,0,0,0,0,0,0,0,0,0,110,0,0,0,0,0,0,65,65,65,65,0,0,0,0,0,0,110,0,0,0,0,0,0,0,0,0,0,0
+	.byte 0,0,0,0,0,0,0,0,0,0,0,110,110,110,110,110,110,110,0,48,48,0,110,110,110,110,110,110,110,0,0,0,0,0,0,0,0,0,0,0
+	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,42,42,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,40,40,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,40,40,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,40,40,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,0,0,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,110,110,110,110,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+
+
+	irq_vector:
 	pha
 	txa
 	pha
@@ -634,6 +853,12 @@ no_pattinc:
 	cmp extracount
 	bne nopartadd
 
+	lda partpattextra,x
+	cmp #2
+	bne nospecial
+	inc talkinit
+nospecial:
+
 	inc demopart
 	lda #0
 	sta partframes
@@ -653,134 +878,19 @@ nopartadd:
     pla
     rti
 
-rnd:  .byte 0
-
-next_rnd:
-	lda rnd
-	rol
-	rol
-	clc
-	adc rnd      ; A = RND * 5
-	clc
-	adc #17      ; A = RND * 5 + 17
-	sta rnd
-	rts
-
-; Copy operation is divided in two parts. N is the total length
-; * memcpyLong for N / 256 blocks
-; * memcpyShort for N % 256 remaining bytes
-memcpy:
-memcpy2:
-	ldy #0
-	lda #0
-	ldx memcpyLen+1
-	beq memcpyShort ; We need only the short version for <1 pages
-memcpyLoopLong: ; Copy X pages
-	lda (memcpySrc),y ; Loop unrolling can be done with confidence here
-	sta (memcpyDst),y ; any power of 2 will work
-	iny
-	bne memcpyLoopLong
-	dex
-	beq memcpyShort
-	inc memcpySrc+1 ; Go to the next page
-	inc memcpyDst+1
-	jmp memcpyLoopLong
-memcpyShort: ; Copy remaining bytes
-	ldx memcpyLen
-	beq memcpyEnd
-memcpyLoopShort: ; Copy X bytes
-	lda (memcpySrc),y
-	sta (memcpyDst),y
-	iny
-	dex
-	bne memcpyLoopShort
-memcpyEnd:
-	rts
+ptr: .word 0
 
 frame: .byte 0
 frame2: .byte 0
 frame3: .byte 0
-animframe: .byte 0
-tedvidoffs: .byte 8,16,24,32,40,48
-
-.res $1600 - *
-.incbin "music.bin"
-
-
-.res $2000 - *
-.incbin "../../build/loader-c16.prg", 2
-
-.res $2800 - *
-.incbin "../../build/install-c16.prg", 2
-
-
-filename1:  .asciiz "signcol"
-filename2:  .asciiz "sign"
-
-screen1: .asciiz  "screen1"
-screen2: .asciiz  "screen2"
-screen3: .asciiz  "screen3"
-screen4: .asciiz  "screen4"
-
-talkco: .asciiz  "talkco"
-
-quadsc: .asciiz "quadsc"
-quadco: .asciiz "quadco"
-
-halpsc: .asciiz "halpsc"
-halpco: .asciiz "halpco"
-
-logosc: .asciiz "logosc"
-logoco: .asciiz "logoco"
-
-
-ptr: .word 0
-
-partpattlen: .byte 2,4,3,4,4
-partpattextra: .byte 1,1,1,1,32
-demoparts: .word dologo, dosign, dopatient, dotalk, dosign
+partpattlen: .byte 2,2,3,6,4,4
+partpattextra: .byte 1,1,2,1,1,2
+demoparts: .word  dologo, dopatient, dotalkandrun, dosign, dotalkandrun, dopatient
 
 extracount: .byte 0
-
-signinit: .byte 0
-
 partframes: .byte 0
 partframes2: .byte 0
 partframes3: .byte 0
 
 partpatts: .byte 0
 demopart: .byte 0
-
-wordval: .word $0878
-wordval2: .word $0c78
-
-xl1: .byte 23,23,23,23,23,23,29,29,29,29,29,29,23,23,23,23,23,23
-
-xl2: .byte 17,17,17,17,17,17,11,11,11,11,11,11,17,17,17,17,17,17
-
-x1: .byte 0
-x2: .byte 0 
-xt: .byte 0
-
-lumavals: .byte 32,64,128,82,14,55,191
-
-pixbuf: ; gradient
-	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,110,110,110,110,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,0,0,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,40,40,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,40,40,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,40,40,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,42,42,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-	.byte 0,0,0,0,0,0,0,0,0,0,0,110,110,110,110,110,110,110,0,48,48,0,110,110,110,110,110,110,110,0,0,0,0,0,0,0,0,0,0,0
-	.byte 0,0,0,0,0,0,0,0,0,0,0,110,0,0,0,0,0,0,65,65,65,65,0,0,0,0,0,0,110,0,0,0,0,0,0,0,0,0,0,0
-	.byte 0,0,0,0,0,0,0,0,0,0,0,110,0,40,40,40,42,48,65,123,123,65,48,42,40,40,40,0,110,0,0,0,0,0,0,0,0,0,0,0
-	.byte 0,0,0,0,0,0,0,0,0,0,0,110,0,40,40,40,42,48,65,123,123,65,48,42,40,40,40,0,110,0,0,0,0,0,0,0,0,0,0,0
-	.byte 0,0,0,0,0,0,0,0,0,0,0,110,0,0,0,0,0,0,65,65,65,65,0,0,0,0,0,0,110,0,0,0,0,0,0,0,0,0,0,0
-	.byte 0,0,0,0,0,0,0,0,0,0,0,110,110,110,110,110,110,110,0,48,48,0,110,110,110,110,110,110,110,0,0,0,0,0,0,0,0,0,0,0
-	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,42,42,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,40,40,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,40,40,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,40,40,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,0,0,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,110,110,110,110,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-

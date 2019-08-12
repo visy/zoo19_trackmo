@@ -163,17 +163,18 @@ endif
 diskimage: $(DISKIMAGE)
 
 $(DISKIMAGE): $(ASSEMBLE) $(PIC1) $(PIC2)
-	exomizer.exe sfx 0x100d -t 16 -o out.prg $(ASSEMBLE)
+	exomizer.exe sfx 0x100d -t 4 -o out.prg $(ASSEMBLE)
 	$(C1541) -format "pretending to be,qt" d64 $@
 	$(C1541) -attach $@ \
 	 -write out.prg "$(NAME)" \
 	 -write $(SIGNC) "signcol" \
 	 -write $(SIGN) "sign" \
-	 -write $(SCREEN1) "screen1" \
+	 -write talksc.tc "talksc" \
 	 -write talkco.tc "talkco" \
-	 -write $(SCREEN2) "screen2" \
-	 -write $(SCREEN3) "screen3" \
-	 -write $(SCREEN4) "screen4" \
+	 -write runsc.tc "runsc" \
+	 -write runco.tc "runco" \
+	 -write pillsc.tc "pillsc" \
+	 -write pillco.tc "pillco" \
 	 -write $(QUADSC) "quadsc" \
 	 -write $(QUADCO) "quadco" \
 	 -write $(HALPSC) "halpsc" \
