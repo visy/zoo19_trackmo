@@ -127,7 +127,7 @@ HALPCO		 = halpco.tc
 QUADSC		= quadsc.tc
 QUADCO		= quadco.tc
 
-NAME         = minexample
+NAME         = demo
 
 SOURCE       = $(NAME).s
 LOADERCFG    = loaderconfig.inc
@@ -163,9 +163,10 @@ endif
 diskimage: $(DISKIMAGE)
 
 $(DISKIMAGE): $(ASSEMBLE) $(PIC1) $(PIC2)
+	exomizer.exe sfx 0x100d -t 16 -o out.prg $(ASSEMBLE)
 	$(C1541) -format "pretending to be,qt" d64 $@
 	$(C1541) -attach $@ \
-	 -write $(ASSEMBLE) "$(NAME)" \
+	 -write out.prg "$(NAME)" \
 	 -write $(SIGNC) "signcol" \
 	 -write $(SIGN) "sign" \
 	 -write $(SCREEN1) "screen1" \

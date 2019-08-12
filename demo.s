@@ -1,11 +1,7 @@
 
-screen     = $5800
-bitmap     = $6000
-
 memcpySrc = $f4
 memcpyDst = $f6
 memcpyLen = $f8
-
 
 .include "../../build/loadersymbols-c16.inc"
 
