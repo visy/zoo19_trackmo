@@ -170,13 +170,10 @@ $(DISKIMAGE): $(ASSEMBLE) $(PIC1) $(PIC2)
 	 -write $(SIGNC) "signcol" \
 	 -write $(SIGN) "sign" \
 	 -write $(SCREEN1) "screen1" \
-	 -write $(SCREEN1C) "color1" \
+	 -write talkco.tc "talkco" \
 	 -write $(SCREEN2) "screen2" \
-	 -write $(SCREEN2C) "color2" \
 	 -write $(SCREEN3) "screen3" \
-	 -write $(SCREEN3C) "color3" \
 	 -write $(SCREEN4) "screen4" \
-	 -write $(SCREEN4C) "color4" \
 	 -write $(QUADSC) "quadsc" \
 	 -write $(QUADCO) "quadco" \
 	 -write $(HALPSC) "halpsc" \

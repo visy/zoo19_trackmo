@@ -37,7 +37,6 @@ zero_bits  = COLOUR_MEDIUMGREY
 
 	        sta $ff3f
 
-
 			ldx #<quadco
 			ldy #>quadco
 			jsr loadcompd
@@ -306,6 +305,9 @@ dosign:
     lda #%00100000 ; screen off
 	sta $ff06
 
+	lda #0
+	sta $ff19
+
     ldx #<filename2
     ldy #>filename2
     jsr loadcompd
@@ -454,65 +456,29 @@ dotalk:
 	lda #0
 	sta signinit
 ;;;;;;;;;;;;;;; talk anim
-	jsr next_rnd
-
 	lda talkinit
 	cmp #1
 	beq dotalk3
 	jmp talkinitor
 
-
 dotalk3:
+	jsr next_rnd
+
 	jmp dotalk2
 
 talkinitor:
 
+	lda #$0
+ 	sta $ff15 ; bgcolor
+ 	lda #$6c
+	sta $ff19 ; border
+
     lda #%00100000 ; screen off
 	sta $ff06
 
-	lda #$0
- 	sta $ff15 ; bgcolor
-	sta $ff19 ; border
 
-	ldx #<color4
-	ldy #>color4
-	jsr loadcompd
-
-	lda #$00
-	sta memcpyDst
-	lda #$08
-	sta memcpyDst+1
-
-	lda #$0
-	sta memcpyLen
-	lda #$08
-	sta memcpyLen+1
-	lda #0
-	sta memcpySrc
-	lda #$d8
-	sta memcpySrc+1
-	jsr memcpy
-
-	ldx #4
-	lda tedvidoffs,x
-	clc
-	sta $ff12
-
-    lda #%00011000 ; mc
-	sta $ff07
-    lda #%00110000 ; no blank, bitmap
-	sta $ff06
-
-	ldx #<color1
-	ldy #>color1
-	jsr loadcompd
-
-	ldx #<color2
-	ldy #>color2
-	jsr loadcompd
-
-	ldx #<color3
-	ldy #>color3
+	ldx #<talkco
+	ldy #>talkco
 	jsr loadcompd
 
 	ldx #<screen1
@@ -524,8 +490,6 @@ talkinitor:
 
 	lda #1
 	sta talkinit
-
-	jmp mainloop
 
 dotalk2:
 	lda frame
@@ -584,33 +548,36 @@ tf1:
 	lda #$c0
 	sta memcpySrc+1
 	jsr memcpy
-	jmp no_switch
+	jmp no_switch4
 tf2:
 	lda #0
 	sta memcpySrc
 	lda #$c8
 	sta memcpySrc+1
 	jsr memcpy
-	jmp no_switch
+	jmp no_switch4
 tf3:
 	lda #0
 	sta memcpySrc
 	lda #$d0
 	sta memcpySrc+1
 	jsr memcpy
-	jmp no_switch
+	jmp no_switch4
 tf4:
 	lda #0
 	sta memcpySrc
 	lda #$d8
 	sta memcpySrc+1
 	jsr memcpy
-	jmp no_switch
+	jmp no_switch4
+
+no_switch4:
+    lda #%00011000 ; mc
+	sta $ff07
+    lda #%00110000 ; no blank, bitmap
+	sta $ff06
 
 no_switch:
-
-	lda $ff1d ; scanline num
-	;sta $ff19 ; border
 
 ;;;;;;;;;;;;;;; talk anim end
 	jmp mainloop
@@ -755,10 +722,7 @@ screen2: .asciiz  "screen2"
 screen3: .asciiz  "screen3"
 screen4: .asciiz  "screen4"
 
-color1: .asciiz  "color1"
-color2: .asciiz  "color2"
-color3: .asciiz  "color3"
-color4: .asciiz  "color4"
+talkco: .asciiz  "talkco"
 
 quadsc: .asciiz "quadsc"
 quadco: .asciiz "quadco"
