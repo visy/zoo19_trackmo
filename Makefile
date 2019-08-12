@@ -112,14 +112,14 @@ SIGNC        = signcol.tc
 SIGN         = sign.tc
 
 SCREEN1		 = screen1.tc
-SCREEN2		 = screen2.bin
-SCREEN3		 = screen3.bin
-SCREEN4		 = screen4.bin
+SCREEN2		 = screen2.tc
+SCREEN3		 = screen3.tc
+SCREEN4		 = screen4.tc
 
-SCREEN1C	= color1.bin
-SCREEN2C	= color2.bin
-SCREEN3C	= color3.bin
-SCREEN4C	= color4.bin
+SCREEN1C	= color1.tc
+SCREEN2C	= color2.tc
+SCREEN3C	= color3.tc
+SCREEN4C	= color4.tc
 
 HALPSC		 = halpsc.tc
 HALPCO		 = halpco.tc

@@ -37,6 +37,11 @@ zero_bits  = COLOUR_MEDIUMGREY
 
 	        jsr install
 
+	        sei
+
+	        sta $ff3f
+
+
 			ldx #<quadco
 			ldy #>quadco
 			jsr loadcompd
@@ -44,23 +49,6 @@ zero_bits  = COLOUR_MEDIUMGREY
 			ldx #<quadsc
 			ldy #>quadsc
 			jsr loadcompd
-
-			lda #0
-			sta memcpySrc
-			lda #$40
-			sta memcpySrc+1
-
-			lda #$00
-			sta memcpyDst
-			lda #$a0
-			sta memcpyDst+1
-
-			lda #$0
-			sta memcpyLen
-			lda #$20
-			sta memcpyLen+1
-			jsr memcpy
-
 
 			ldx #4
 			lda tedvidoffs,x
@@ -75,77 +63,23 @@ zero_bits  = COLOUR_MEDIUMGREY
 
 			ldx #<screen2
 			ldy #>screen2
-			jsr loadraw
-
-			lda #0
-			sta memcpySrc
-			lda #$40
-			sta memcpySrc+1
-
-			lda #$00
-			sta memcpyDst
-			lda #$60
-			sta memcpyDst+1
-
-			lda #$0
-			sta memcpyLen
-			lda #$20
-			sta memcpyLen+1
-			jsr memcpy
+			jsr loadcompd
 
 			ldx #<screen3
 			ldy #>screen3
-			jsr loadraw
-
-			lda #0
-			sta memcpySrc
-			lda #$40
-			sta memcpySrc+1
-
-			lda #$00
-			sta memcpyDst
-			lda #$80
-			sta memcpyDst+1
-
-			lda #$0
-			sta memcpyLen
-			lda #$20
-			sta memcpyLen+1
-			jsr memcpy
+			jsr loadcompd
 
 			ldx #<screen4
 			ldy #>screen4
-			jsr loadraw
+			jsr loadcompd
 
 		    lda #%00100000 ; screen off
 			sta $ff06
 
-			lda #0
-			sta memcpySrc
-			lda #$40
-			sta memcpySrc+1
-
-			lda #$00
-			sta memcpyDst
-			lda #$a0
-			sta memcpyDst+1
-
-			lda #$0
-			sta memcpyLen
-			lda #$20
-			sta memcpyLen+1
-
-			jsr memcpy
-
-
-
-
-			sei
-
 		    lda #<irq_vector    ; Set IRQ vector to be called
-		    sta $0314           ; Once per screen refresh
+		    sta $FFFE           ; Once per screen refresh
 		    lda #>irq_vector
-		    sta $0315           ; The $ 314 / $ 315 vector points to the IRQ raster routine
+		    sta $FFFF           ; The $ 314 / $ 315 vector points to the IRQ raster routine
 
 		    lda #$00
 		    jsr $1600           ; Initialize sid to play song 0
@@ -546,7 +480,7 @@ talkinitor:
 
 	ldx #<color4
 	ldy #>color4
-	jsr loadraw
+	jsr loadcompd
 
 	lda #$00
 	sta memcpyDst
@@ -559,7 +493,7 @@ talkinitor:
 	sta memcpyLen+1
 	lda #0
 	sta memcpySrc
-	lda #$40
+	lda #$d8
 	sta memcpySrc+1
 	jsr memcpy
 
@@ -568,93 +502,22 @@ talkinitor:
 	clc
 	sta $ff12
 
-
     lda #%00011000 ; mc
 	sta $ff07
     lda #%00110000 ; no blank, bitmap
 	sta $ff06
 
+	ldx #<color1
+	ldy #>color1
+	jsr loadcompd
 
+	ldx #<color2
+	ldy #>color2
+	jsr loadcompd
 
-			ldx #<color1
-			ldy #>color1
-			jsr loadraw
-
-			lda #$00
-			sta memcpyDst
-			lda #$c0
-			sta memcpyDst+1
-
-			lda #$0
-			sta memcpyLen
-			lda #$08
-			sta memcpyLen+1
-
-			lda #0
-			sta memcpySrc
-			lda #$40
-			sta memcpySrc+1
-			jsr memcpy
-
-			ldx #<color2
-			ldy #>color2
-			jsr loadraw
-
-			lda #$00
-			sta memcpyDst
-			lda #$c8
-			sta memcpyDst+1
-
-			lda #$0
-			sta memcpyLen
-			lda #$08
-			sta memcpyLen+1
-
-			lda #0
-			sta memcpySrc
-			lda #$40
-			sta memcpySrc+1
-			jsr memcpy
-
-			ldx #<color3
-			ldy #>color3
-			jsr loadraw
-
-			lda #$00
-			sta memcpyDst
-			lda #$d0
-			sta memcpyDst+1
-
-			lda #$0
-			sta memcpyLen
-			lda #$08
-			sta memcpyLen+1
-
-			lda #0
-			sta memcpySrc
-			lda #$40
-			sta memcpySrc+1
-			jsr memcpy
-
-			ldx #<color4
-			ldy #>color4
-			jsr loadraw
-
-			lda #$00
-			sta memcpyDst
-			lda #$d8
-			sta memcpyDst+1
-
-			lda #$0
-			sta memcpyLen
-			lda #$08
-			sta memcpyLen+1
-
-			lda #0
-			sta memcpySrc
-			lda #$40
-			sta memcpySrc+1
-			jsr memcpy2
+	ldx #<color3
+	ldy #>color3
+	jsr loadcompd
 
 	ldx #<screen1
 	ldy #>screen1
@@ -758,6 +621,12 @@ no_switch:
 
 
 irq_vector:
+	pha
+	txa
+	pha
+	tya
+	pha
+
 	asl $ff09
 
 	inc frame
@@ -814,8 +683,12 @@ nopartadd:
     jsr $1603
 	jsr $1606
 
-    jmp $ce0e           ; Exit interrupt
-
+    pla
+    tay
+    pla
+    tax
+    pla
+    rti
 
 rnd:  .byte 0
 
@@ -834,8 +707,6 @@ next_rnd:
 ; * memcpyLong for N / 256 blocks
 ; * memcpyShort for N % 256 remaining bytes
 memcpy:
-	sei
-	sta $ff3f
 memcpy2:
 	ldy #0
 	lda #0
@@ -861,8 +732,6 @@ memcpyLoopShort: ; Copy X bytes
 	dex
 	bne memcpyLoopShort
 memcpyEnd:
-	sta $ff3e
-	cli
 	rts
 
 frame: .byte 0
