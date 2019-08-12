@@ -362,6 +362,9 @@ yloop2:
 
 	jmp mainloop
 
+signcolors: .byte $5c,$1b,$7a,$d3,0
+signcolor: .byte 0
+
 dosign:
 	lda #0
 	sta talkinit
@@ -438,6 +441,10 @@ signxloop:
 
 signadd:
 	sta $0878,x
+	ldy partpatts
+	lda signcolors,y
+signadd2:
+	sta $0c78,x
 nocross:
 
 nocross3:
@@ -467,9 +474,29 @@ ok:
 	lda wordval+1
 	sta signadd+2
 
+add2:
+	clc		
+	lda wordval2+0
+	adc #40
+	sta wordval2+0
+	bcc ok2
+	inc wordval2+1
+ok2:
+	lda wordval2+0
+	sta signadd2+1
+	lda wordval2+1
+	sta signadd2+2
+
 	iny
 	cpy #18
-	bne signyloop
+	bne signyloop22
+
+	jmp signyexit
+
+signyloop22:
+	jmp signyloop
+
+signyexit:
 
 	lda #$08
 	sta signadd+2
@@ -477,6 +504,13 @@ ok:
 	lda #$78
 	sta signadd+1
 	sta wordval+0
+
+	lda #$0c
+	sta signadd2+2
+	sta wordval2+1
+	lda #$78
+	sta signadd2+1
+	sta wordval2+0
 
 	jsr next_rnd
 
@@ -756,17 +790,25 @@ nopf3:
 	bne no_pattinc
 	inc partpatts
 
+no_pattinc:
 	ldx demopart
 	lda partpattlen,x
 	cmp partpatts
 	bne nopartadd
+
+	inc extracount
+
+	lda partpattextra,x
+	cmp extracount
+	bne nopartadd
+
 	inc demopart
 	lda #0
 	sta partframes
 	sta partpatts
-
+	sta extracount
 nopartadd:
-no_pattinc:
+
 
 	; tick and output to ted
     jsr $1603
@@ -865,9 +907,11 @@ logoco: .asciiz "logoco"
 
 ptr: .word 0
 
-partpattlen: .byte 2,4,3,4,8
-partpattextra: .byte 240,255,128,255,255
+partpattlen: .byte 2,4,3,4,4
+partpattextra: .byte 1,1,1,1,32
 demoparts: .word dologo, dosign, dopatient, dotalk, dosign
+
+extracount: .byte 0
 
 signinit: .byte 0
 
@@ -879,6 +923,7 @@ partpatts: .byte 0
 demopart: .byte 0
 
 wordval: .word $0878
+wordval2: .word $0c78
 
 xl1: .byte 23,23,23,23,23,23,29,29,29,29,29,29,23,23,23,23,23,23
 
