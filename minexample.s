@@ -50,7 +50,7 @@ zero_bits  = COLOUR_MEDIUMGREY
 			ldy #>quadsc
 			jsr loadcompd
 
-			ldx #4
+			ldx #5
 			lda tedvidoffs,x
 			clc
 			sta $ff12
