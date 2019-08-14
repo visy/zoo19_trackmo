@@ -107,7 +107,7 @@ LC_SPEED                           = 6 ; Taboo Levelcrush speed, irrelevant if u
 
 ; feature, won't change host-side code size but change some functionality
 
-.define DISABLE_WATCHDOG           0 ; disable the drive-side watchdog - the watchdog will reset the drive safely when the host resets at any point,
+.define DISABLE_WATCHDOG           1 ; disable the drive-side watchdog - the watchdog will reset the drive safely when the host resets at any point,
                                      ; however, the drive hardware (1541 and 1571) only allows for a maximum time-out period of 65536 cycles: this means
                                      ; that letting the loader starve for a few video frames (about 1.5 frames since the time-out is often just 32768
                                      ; cycles due to size optimization) will reset the drive, which can be prevented using this option.
