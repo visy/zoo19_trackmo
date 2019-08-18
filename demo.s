@@ -784,13 +784,14 @@ talkinitor:
  	lda #$6c
 	sta $ff19 ; border
 
+	ldx #<talkco
+	ldy #>talkco
+	jsr loadcompd
+
 	ldx #<talksc
 	ldy #>talksc
 	jsr loadcompd
 
-	ldx #<talkco
-	ldy #>talkco
-	jsr loadcompd
 
 	lda #0
 	sta frame
