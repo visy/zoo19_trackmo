@@ -74,12 +74,17 @@ yclr:
 	sta $0800,x
 	sta $0900,x
 	sta $0a00,x
+	cpx #112
+	bcs nobig2
 	sta $0b00,x
+nobig2:
 	sta $0c00,x
 	sta $0d00,x
 	sta $0e00,x
+	cpx #112
+	bcs nobig3
 	sta $0f00,x
-
+nobig3:
 	lda #$ff
 	and $4001,x
 	sta $4000,x
@@ -119,13 +124,10 @@ yclr:
 	sta $5800,x
 	sta $5900,x
 	sta $5a00,x
+	cpx #128
+	bcs nobig
 	sta $5b00,x
-	sta $5c00,x
-	sta $5d00,x
-	sta $5e00,x
-	sta $5f00,x
-
-
+nobig:
 	inx
 	cpx #0
 	bne yclr2
@@ -268,8 +270,24 @@ past:
 rts
 
 
+meminit:
+	.byte 0
+
 
 domem:
+
+	lda meminit
+	cmp #1
+	beq nomeminit
+
+
+	ldx #<tekstico
+	ldy #>tekstico
+	jsr loadcompd
+
+	ldx #<tekstisc
+	ldy #>tekstisc
+	jsr loadcompd
 
     lda #8 ; mc
 	sta $ff07
@@ -282,11 +300,10 @@ domem:
     lda #$3b ; no blank, bitmap
 	sta $ff06
 
-	lda #0
-	;sta pointX
-	lda #0
-	;sta pointX+1
+	lda #1
+	sta meminit
 
+nomeminit:
 	ldy #0
 do_memxl:
 	ldx #0
@@ -1013,6 +1030,10 @@ pillsc: .asciiz "pillsc"
 pillco: .asciiz "pillco"
 
 music2: .asciiz "music2"
+
+tekstisc: .asciiz "tekstisc"
+tekstico: .asciiz "tekstico"
+
 
 signinit: .byte 0
 
