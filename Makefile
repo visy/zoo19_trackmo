@@ -147,7 +147,7 @@ tellarch:
 loader: $(LOADER)
 
 $(LOADER): $(LOADERCFG)
-	make -C $(LOADER_SRC) EXTCONFIGPATH=../samples/$(NAME) INSTALL=2800 RESIDENT=2000 ZP=02 prg
+	make -C $(LOADER_SRC) EXTCONFIGPATH=../samples/$(NAME) INSTALL=2300 RESIDENT=2f00 ZP=02 prg
 
 
 $(ASSEMBLE): $(SOURCE) $(LOADER) $(LOADERCFG)
@@ -180,7 +180,8 @@ $(DISKIMAGE): $(ASSEMBLE) $(PIC1) $(PIC2)
 	 -write $(HALPSC) "halpsc" \
 	 -write $(HALPCO) "halpco" \
 	 -write "logosc.tc" "logosc" \
-	 -write "logoco.tc" "logoco"
+	 -write "logoco.tc" "logoco" \
+	 -write "music2.tc" "music2"
 	 
 
 

@@ -64,23 +64,13 @@ zero_bits  = COLOUR_MEDIUMGREY
 		    lda #$00
 		    jsr $1600           ; Initialize sid to play song 0
 
-			ldx #<logosc
-			ldy #>logosc
-			jsr loadcompd
-
-		    lda #%00100000 ; screen off
-			sta $ff06
-
-			ldx #<logoco
-			ldy #>logoco
-			jsr loadcompd
-
 
 		    cli                 ; Enable interrupts again
 
+do_yclr:
 	ldx #0
 yclr:
-	lda #0
+	lda #$e1
 	sta $0800,x
 	sta $0900,x
 	sta $0a00,x
@@ -90,11 +80,84 @@ yclr:
 	sta $0e00,x
 	sta $0f00,x
 
+	lda #$ff
+	and $4001,x
+	sta $4000,x
+
+	lda #$ff
+	and $4101,x
+	sta $4100,x
+	lda #$ff
+	and $4201,x
+	sta $4200,x
+	lda #$ff
+	and $4301,x
+	sta $4300,x
+	lda #$ff
+	and $4401,x
+	sta $4400,x
+
+	sta $4500,x
+	sta $4600,x
+	sta $4700,x
+	sta $4800,x
+	sta $4900,x
+	sta $4a00,x
+	sta $4b00,x
+	sta $4c00,x
+	sta $4d00,x
+	sta $4e00,x
+	sta $4f00,x
+	sta $5000,x
+	sta $5100,x
+	sta $5200,x
+	sta $5300,x
+	sta $5400,x
+	sta $5500,x
+	sta $5600,x
+	sta $5700,x
+	sta $5800,x
+	sta $5900,x
+	sta $5a00,x
+	sta $5b00,x
+	sta $5c00,x
+	sta $5d00,x
+	sta $5e00,x
+	sta $5f00,x
+
+
 	inx
 	cpx #0
-	bne yclr
+	bne yclr2
+
+	jmp mainloop
+
+yclr2:
+	jmp yclr
 
 mainloop:
+
+			lda changesong
+			cmp #1
+			bne nochangesong
+
+			sei
+			lda #0
+			sta changesong
+
+			lda #0
+			sta $ff11
+
+			ldx #<music2
+			ldy #>music2
+			jsr loadcompd
+
+		    lda #$00
+		    jsr $1600           ; Initialize sid to play song 0
+
+			cli
+
+nochangesong:
 
 			lda demopart
 			asl
@@ -118,7 +181,7 @@ logoinit: .byte 0
 
 
 pointX =*                   ;0-319
-.word 160
+.word 0
 
 pointY =*                   ;0-199
 .byte 100
@@ -219,62 +282,54 @@ domem:
     lda #$3b ; no blank, bitmap
 	sta $ff06
 
+	lda #0
+	;sta pointX
+	lda #0
+	;sta pointX+1
 
+	ldy #0
+do_memxl:
 	ldx #0
 memxl:
-;	lda frame1
-	lda $ff1f
-	and #7
-	sta x1
-	clc
-	rol	
-	rol	
-	rol	
-	rol
-	clc
-	adc x1
-	and $ff0f
-	and #1
 
+	stx x2
+	sty x1
+
+	cpx #64
+	bne noexit
+	cpy #1
+	bne noexit
+	jmp exitmem
+noexit:
 	stx pointX
-	ldy #0
 	sty pointX+1
 
-	ldy #100
-	stx pointY ;; todo
+	lda $ff1d
+	adc pointX
+	and #127
+	sta pointY
 
 	jsr plot
 
-
-nolast:
+	ldx x2
+	ldy x1
 
 	inx
 	cpx #0
 	bne memxl2
 
-ywaitmem:
-	ldx $ff1b
-	cpx #16
-	bcs ywaitmem
 
-	ldx #0
-memxl3:
-	ldy $0800,x
-	dey
-	tya
-	and $ff0e
-	sta $0800,x
-	sta $0900,x
-	sta $0a00,x
-	cpx #$e7
-	bcc nob
-	sta $0b00,x
-nob:	
-	inx
-	cpx #0
-	bne memxl3
+	iny
+	cpy #2
+	bne do_memxl
 
-	jmp mainloop
+@nonewframe:
+	lda $ff1d
+	cmp #0
+	bne @nonewframe      
+
+exitmem:
+	jmp do_yclr
 
 memxl2:
 	jmp memxl
@@ -296,6 +351,14 @@ dologo:
     lda #%00010000 ; ted stop
 	sta $ff07 ; ted stop
 
+
+	ldx #<logosc
+	ldy #>logosc
+	jsr loadcompd
+
+	ldx #<logoco
+	ldy #>logoco
+	jsr loadcompd
 
 
 
@@ -510,6 +573,8 @@ dosign:
 	cmp #1
 	beq signdone
 
+	lda #0
+	sta talkinit
     lda #%00100000 ; screen off
 	sta $ff06
 
@@ -536,13 +601,6 @@ dosign:
 	clc
 	sta $ff12
 
-    lda #%00011000 ; mc
-	sta $ff07
-    lda #%00110000 ; no blank, bitmap
-	sta $ff06
-
-	lda #1
-	sta signinit
 
 signdone:
 
@@ -659,6 +717,19 @@ signyexit:
 
 	jsr next_rnd
 
+	lda signinit
+	cmp #1
+	beq nosignon
+
+    lda #%00011000 ; mc
+	sta $ff07
+    lda #%00110000 ; no blank, bitmap
+	sta $ff06
+
+	lda #1
+	sta signinit
+nosignon:
+
 	jmp mainloop
 
 
@@ -673,8 +744,6 @@ dotalkandrun:
 	lda talkinit
 	cmp #1
 	beq dotalk3
-	cmp #3
-	beq dotalk3
 	jmp talkinitor
 
 dotalk3:
@@ -688,8 +757,9 @@ talkinitor:
     lda #%00100000 ; screen off
 	sta $ff06
 
-	lda talkinit
-	cmp #0
+	ldx demopart
+	lda partpattextra,x
+	cmp #2
 	beq initrun
 
 	lda #$0
@@ -697,13 +767,12 @@ talkinitor:
  	lda #$6c
 	sta $ff19 ; border
 
-	ldx #<talkco
-	ldy #>talkco
-	jsr loadcompd
-
-
 	ldx #<talksc
 	ldy #>talksc
+	jsr loadcompd
+
+	ldx #<talkco
+	ldy #>talkco
 	jsr loadcompd
 
 	lda #0
@@ -729,10 +798,10 @@ initrun:
 	jsr loadcompd
 
 
+	inc talkinit
 
 	lda #0
 	sta frame
-	inc talkinit
 
 	jmp runinitdone
 
@@ -842,9 +911,10 @@ tf4:
 
 no_switch4:
 
-	lda talkinit
+	ldx demopart
+	lda partpattextra,x
 	cmp #1
-	bne mctalk
+	beq mctalk
 
 	lda #%00001000 ; hires ted on
 	sta $ff07
@@ -913,12 +983,12 @@ tedvidoffs: .byte 8,16,24,32,40,48,56
 .res $1600 - *
 .incbin "music.bin"
 
+.res $2300 - *
+.incbin "../../build/install-c16.prg", 2
 
-.res $2000 - *
+.res $2f00 - *
 .incbin "../../build/loader-c16.prg", 2
 
-.res $2800 - *
-.incbin "../../build/install-c16.prg", 2
 
 
 filename1:  .asciiz "signcol"
@@ -942,9 +1012,11 @@ logoco: .asciiz "logoco"
 pillsc: .asciiz "pillsc"
 pillco: .asciiz "pillco"
 
+music2: .asciiz "music2"
 
 signinit: .byte 0
 
+changesong: .byte 0
 
 wordval: .word $0878
 wordval2: .word $0c78
@@ -1031,19 +1103,23 @@ no_pattinc:
 	cmp extracount
 	bne nopartadd
 
-	lda partpattextra,x
-	cmp #2
-	bne nospecial
-	inc talkinit
-nospecial:
-
 	inc demopart
+	ldx demopart
+	lda partpattextra,x
+	cmp #254
+	bne nomusicchangetoggle
+
+	lda #1
+	sta changesong
+
+nomusicchangetoggle:	
+
+
 	lda #0
 	sta partframes
 	sta partpatts
 	sta extracount
 nopartadd:
-
 
 	; tick and output to ted
     jsr $1603
@@ -1061,9 +1137,9 @@ ptr: .word 0
 frame: .byte 0
 frame2: .byte 0
 frame3: .byte 0
-partpattlen: .byte 92,2,3,6,4,4
-partpattextra: .byte 1,1,2,1,1,2
-demoparts: .word  domem, dologo, dopatient, dotalkandrun, dosign, dotalkandrun, dopatient
+partpattlen: .byte 2,2,2,3,6,4,4
+partpattextra: .byte 1,1,1,2,254,1,2
+demoparts: .word  dologo, domem, dopatient, dotalkandrun, dosign, dotalkandrun, dopatient
 
 extracount: .byte 0
 partframes: .byte 0
