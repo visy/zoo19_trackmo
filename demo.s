@@ -789,38 +789,6 @@ next_rnd:
 	sta rnd
 	rts
 
-; Copy operation is divided in two parts. N is the total length
-; * memcpyLong for N / 256 blocks
-; * memcpyShort for N % 256 remaining bytes
-memcpy:
-memcpy2:
-	ldy #0
-	lda #0
-	ldx memcpyLen+1
-	beq memcpyShort ; We need only the short version for <1 pages
-memcpyLoopLong: ; Copy X pages
-	lda (memcpySrc),y ; Loop unrolling can be done with confidence here
-	sta (memcpyDst),y ; any power of 2 will work
-	iny
-	bne memcpyLoopLong
-	dex
-	beq memcpyShort
-	inc memcpySrc+1 ; Go to the next page
-	inc memcpyDst+1
-	jmp memcpyLoopLong
-memcpyShort: ; Copy remaining bytes
-	ldx memcpyLen
-	beq memcpyEnd
-memcpyLoopShort: ; Copy X bytes
-	lda (memcpySrc),y
-	sta (memcpyDst),y
-	iny
-	dex
-	bne memcpyLoopShort
-memcpyEnd:
-	rts
-
-animframe: .byte 0
 tedvidoffs: .byte 8,16,24,32,40,48,56
 
 .res $1600 - *
