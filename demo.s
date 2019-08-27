@@ -36,7 +36,7 @@ zero_bits  = COLOUR_MEDIUMGREY
 			lda #%00000000 ; screen at 4*$400
 			sta $ff13
 
-			lda #%00001000 ; vidram at $0800
+			lda #%00001000 ; color at $0800
 			sta $ff14
 
 		    lda #%00010000 ; ted stop
@@ -1231,11 +1231,15 @@ compdataoffsets:
 	.word $6000, $6735, $69BB, $712D, $73E8, $7B65, $7E28, $859D
 
 decdestoffsets:
-	.word $4000, $0800, $4000, $0800, $4000, $0800, $4000, $0800
+	.word $4000, $0800, $A000, $C000, $4000, $0800, $A000, $C000
+
+	;; alt to 4000 and 0800 / A000 and c000
 
 runtimes:
 	.byte 0
 
+screenflip:
+	.byte 0
 
 dorun:
 
@@ -1258,14 +1262,6 @@ dorun:
 
     lda #%00011000 ; mc
 	sta $ff07
-
-	ldx #1
-	lda tedvidoffs,x
-	clc
-	sta $ff12
-
-	lda #$3b ; no blank, bitmap
-	sta $ff06
 
 	jmp mainloop
 
@@ -1298,6 +1294,37 @@ rundo:
 	lda runtimes
 	cmp #2
 	bne rundo
+
+	inc screenflip
+	lda screenflip
+	cmp #2
+	beq flip2
+flip1:
+	lda #%00001000 ; color at $0800
+	sta $ff14
+
+	ldx #1 ;bitmap at $4000
+	lda tedvidoffs,x
+	clc
+	sta $ff12
+
+	jmp flipdone
+flip2:
+	lda #%11000000 ; color at $c000
+	sta $ff14
+
+	ldx #4 ;bitmap at $a000
+	lda tedvidoffs,x
+	clc
+	sta $ff12
+
+	lda #0
+	sta screenflip
+
+flipdone:
+
+	lda #$3b ; no blank, bitmap
+	sta $ff06
 
 	lda #0
 	sta runtimes
