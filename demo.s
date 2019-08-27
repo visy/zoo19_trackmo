@@ -519,6 +519,9 @@ patientspecialinit:
 	lda #$80
  	sta $ff15 ; bgcolor
 
+	lda #%00001000 ; color at $0800
+	sta $ff14
+
 	ldx #<pillco
 	ldy #>pillco
 	jsr loadcompd
@@ -539,6 +542,9 @@ patient0:
 	lda #$f1
 	sta $ff19 ; border
  	sta $ff15 ; bgcolor
+
+	lda #%00001000 ; color at $0800
+	sta $ff14
 
 	ldx #<halpco
 	ldy #>halpco
@@ -602,8 +608,6 @@ dosign:
 	cmp #1
 	beq signdone
 
-	lda #0
-	sta talkinit
     lda #%00100000 ; screen off
 	sta $ff06
 
@@ -623,6 +627,12 @@ dosign:
 
     lda #0
     sta partpatts
+
+	lda #$0
+ 	sta $ff15 ; bgcolor
+
+	lda #%00001000 ; color at $0800
+	sta $ff14
 
 
 	ldx #1
@@ -763,190 +773,6 @@ nosignon:
 
 
 
-talkinit: .byte 0
-
-
-dotalkandrun:
-	lda #0
-	sta signinit
-	sta patientinit
-;;;;;;;;;;;;;;; talk anim
-	lda talkinit
-	cmp #1
-	beq dotalk3
-	jmp talkinitor
-
-dotalk3:
-	jsr next_rnd
-
-	jmp dotalk2
-
-talkinitor:
-
-    lda #%00100000 ; screen off
-	sta $ff06
-
-	ldx demopart
-	lda partpattextra,x
-	cmp #2
-	beq initrun
-
-
-	lda #0
-	sta frame
-
-	inc talkinit
-
-	jmp runinitdone
-
-initrun:
-
-	lda #$f1
-	sta $ff19 ; border
-	lda #$0
- 	sta $ff15 ; bgcolor
-
-	ldx #<runco
-	ldy #>runco
-	jsr loadcompd
-
-	ldx #<runsc
-	ldy #>runsc
-	jsr loadcompd
-
-
-	inc talkinit
-
-	lda #0
-	sta frame
-
-	jmp runinitdone
-
-norun:
-
-
-
-dotalk2:
-	lda frame
-	cmp #6
-	bne no_switch3
-	jmp check
-no_switch3:
-	jmp no_switch
-check:
-	lda #0
-	sta frame
-
-	inc animframe
-	lda animframe
-	cmp #2
-	bne no_switch3
-	lda #0
-	sta animframe
-
-no_switch2:
-
-runinitdone:
-
-	lda #$00
-	sta memcpyDst
-	lda #$08
-	sta memcpyDst+1
-
-	lda #$0
-	sta memcpyLen
-	lda #$08
-	sta memcpyLen+1
-
-	lda talkinit
-	cmp #1
-	beq runlogic
-
-	lda rnd
-	and #3
-	clc
-	adc #2
-	tax
-
-	jmp talklogicdone
-
-runlogic:
-
-	lda partframes2
-	and #3
-	clc
-	adc #2
-	tax
-
-talklogicdone:
-
-	lda tedvidoffs,x
-	clc
-	sta $ff12
-
-	dex
-	dex
-
-	cpx #0
-	beq tf1
-	cpx #1
-	beq tf2
-	cpx #2
-	beq tf3
-	cpx #3
-	beq tf4
-	jmp no_switch
-
-tf1:
-	lda #0
-	sta memcpySrc
-	lda #$40
-	sta memcpySrc+1
-	jsr memcpy
-	jmp no_switch4
-tf2:
-	lda #0
-	sta memcpySrc
-	lda #$48
-	sta memcpySrc+1
-	jsr memcpy
-	jmp no_switch4
-tf3:
-	lda #0
-	sta memcpySrc
-	lda #$50
-	sta memcpySrc+1
-	jsr memcpy
-	jmp no_switch4
-tf4:
-	lda #0
-	sta memcpySrc
-	lda #$58
-	sta memcpySrc+1
-	jsr memcpy
-	jmp no_switch4
-
-no_switch4:
-
-	ldx demopart
-	lda partpattextra,x
-	cmp #1
-	beq mctalk
-
-	lda #%00001000 ; hires ted on
-	sta $ff07
-
-	jmp no_switch
-mctalk:
-    lda #%00011000 ; mc
-	sta $ff07
-
-no_switch:
-    lda #%00110000 ; no blank, bitmap
-	sta $ff06
-
-;;;;;;;;;;;;;;; talk anim end
-	jmp mainloop
 
 
 
@@ -1141,6 +967,7 @@ nomusicchangetoggle:
 	sta partframes
 	sta partpatts
 	sta extracount
+	sta runinit
 nopartadd:
 
 	; tick and output to ted
@@ -1239,6 +1066,15 @@ decdestoffsets:
 
 	;; alt to 4000 and 0800 / A000 and c000
 
+;; for run anim
+
+compdataoffsets2:
+	.word $6000, $64A7, $660A, $6ABC, $6C23, $70FC, $726A, $7724, $7885, $7D31, $7E92, $8348, $84AD, $897C, $8AE6, $8FAA
+
+
+decdestoffsets2:
+	.word $4000, $0800, $A000, $C000, $4000, $0800, $A000, $C000, $4000, $0800, $A000, $C000, $4000, $0800, $A000, $C000
+
 runtimes:
 	.byte 0
 
@@ -1258,17 +1094,21 @@ dorunner:
 	ldy #>runpack
 	jsr loadraw
 
-	lda #1
+	lda #2
 	sta runinit
 
 	lda #0
 	sta runindex
 
-    lda #%00011000 ; mc
+    lda #%00001000 ; hires
 	sta $ff07
 
+	jmp mainloop
 
 dotalker:
+
+	lda #0
+	sta patientinit
 
 	lda runinit
 	cmp #0
@@ -1287,6 +1127,9 @@ dotalker:
 	lda #0
 	sta runindex
 
+	lda #$0
+ 	sta $ff15 ; bgcolor
+
     lda #%00011000 ; mc
 	sta $ff07
 
@@ -1296,6 +1139,12 @@ rundo_start:
 rundo:
 
 	ldx runindex
+
+	lda runinit
+	cmp #2
+	beq runnerlogic1
+
+talkerlogic1:
 
 	lda decdestoffsets+1,x
 	sta decdesthi
@@ -1308,6 +1157,22 @@ rundo:
 	lda compdataoffsets,x
 	tax
 
+	jmp commonlogic
+
+runnerlogic1:
+
+	lda decdestoffsets2+1,x
+	sta decdesthi
+
+	lda decdestoffsets2,x
+	sta decdestlo
+
+	lda compdataoffsets2+1,x
+	tay
+	lda compdataoffsets2,x
+	tax
+
+commonlogic:
 	stx loadaddrlo
 	sty loadaddrhi
 
@@ -1356,6 +1221,10 @@ flipdone:
 	lda #0
 	sta runtimes
 
+	lda runinit
+	cmp #2
+	beq longerlogic
+
 	lda runindex
 	cmp #16
 	bne runexit
@@ -1363,9 +1232,18 @@ flipdone:
 	lda #0
 	sta runindex
 
+	jmp runexit
+
+longerlogic:
+
+	lda runindex
+	cmp #32
+	bne runexit
+
+	lda #0
+	sta runindex
+
 runexit:
-
-
 	jmp mainloop
 
 
