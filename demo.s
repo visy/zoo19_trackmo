@@ -5,6 +5,17 @@ memcpyLen = $f8
 
 .include "../../build/loadersymbols-c16.inc"
 
+    .macro MEMDECOMP_TO source_lo, source_hi, dest_lo, dest_hi
+            sec
+            lda dest_lo
+            sta decdestlo
+            lda dest_hi
+            sta decdesthi
+            ldx source_lo
+            ldy source_hi
+            jsr memdecomp
+    .endmacro
+
 .include "standard.inc"
 .include "ted.inc"
 
@@ -372,6 +383,7 @@ dologo:
 	ldx #<logosc
 	ldy #>logosc
 	jsr loadcompd
+
 
 	ldx #<logoco
 	ldy #>logoco
@@ -753,6 +765,7 @@ nosignon:
 
 talkinit: .byte 0
 
+
 dotalkandrun:
 	lda #0
 	sta signinit
@@ -770,7 +783,6 @@ dotalk3:
 
 talkinitor:
 
-
     lda #%00100000 ; screen off
 	sta $ff06
 
@@ -778,19 +790,6 @@ talkinitor:
 	lda partpattextra,x
 	cmp #2
 	beq initrun
-
-	lda #$0
- 	sta $ff15 ; bgcolor
- 	lda #$6c
-	sta $ff19 ; border
-
-	ldx #<talkco
-	ldy #>talkco
-	jsr loadcompd
-
-	ldx #<talksc
-	ldy #>talksc
-	jsr loadcompd
 
 
 	lda #0
@@ -1012,8 +1011,7 @@ tedvidoffs: .byte 8,16,24,32,40,48,56
 filename1:  .asciiz "signcol"
 filename2:  .asciiz "sign"
 
-talksc: .asciiz  "talksc"
-talkco: .asciiz  "talkco"
+cpack: .asciiz  "cpack"
 
 runsc: .asciiz  "runsc"
 runco: .asciiz  "runco"
@@ -1161,7 +1159,7 @@ frame2: .byte 0
 frame3: .byte 0
 partpattlen: .byte 2,2,2,3,6,4,4
 partpattextra: .byte 1,1,1,2,254,1,2
-demoparts: .word  dologo, domem, dopatient, dotalkandrun, dosign, dotalkandrun, dopatient
+demoparts: .word  dologo, domem, dopatient, dotalkandrun, dosign, dorun, dopatient
 
 extracount: .byte 0
 partframes: .byte 0
@@ -1222,3 +1220,101 @@ tbl_andbit:
 .byte %11111011
 .byte %11111101
 .byte %11111110 
+
+runinit:
+	.byte 0
+
+runindex:
+	.byte 0
+
+compdataoffsets:
+	.word $6000, $6735, $69BB, $712D, $73E8, $7B65, $7E28, $859D
+
+decdestoffsets:
+	.word $4000, $0800, $4000, $0800, $4000, $0800, $4000, $0800
+
+runtimes:
+	.byte 0
+
+
+dorun:
+
+	lda runinit
+	cmp #0
+	bne rundo_start
+
+    lda #%00100000 ; screen off
+	sta $ff06
+
+	ldx #<cpack
+	ldy #>cpack
+	jsr loadraw
+
+	lda #1
+	sta runinit
+
+	lda #0
+	sta runindex
+
+    lda #%00011000 ; mc
+	sta $ff07
+
+	ldx #1
+	lda tedvidoffs,x
+	clc
+	sta $ff12
+
+	lda #$3b ; no blank, bitmap
+	sta $ff06
+
+	jmp mainloop
+
+rundo_start:
+rundo:
+
+	ldx runindex
+
+	lda decdestoffsets+1,x
+	sta decdesthi
+
+	lda decdestoffsets,x
+	sta decdestlo
+
+	lda compdataoffsets+1,x
+	tay
+	lda compdataoffsets,x
+	tax
+
+	stx loadaddrlo
+	sty loadaddrhi
+
+	sec
+    jsr memdecomp ;; decomp to memory based on offset tables
+
+	inc runindex
+	inc runindex
+
+	inc runtimes
+	lda runtimes
+	cmp #2
+	bne rundo
+
+	lda #0
+	sta runtimes
+
+	lda runindex
+	cmp #16
+	bne runexit
+
+	lda #0
+	sta runindex
+
+runexit:
+
+
+	jmp mainloop
+
+
+
+
+

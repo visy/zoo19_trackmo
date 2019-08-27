@@ -169,8 +169,7 @@ $(DISKIMAGE): $(ASSEMBLE) $(PIC1) $(PIC2)
 	 -write out.prg "$(NAME)" \
 	 -write $(SIGNC) "signcol" \
 	 -write $(SIGN) "sign" \
-	 -write talksc.tc "talksc" \
-	 -write talkco.tc "talkco" \
+	 -write c_pack.tc "cpack" \
 	 -write runsc.tc "runsc" \
 	 -write runco.tc "runco" \
 	 -write pillsc.tc "pillsc" \

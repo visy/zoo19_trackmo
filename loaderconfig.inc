@@ -46,13 +46,13 @@ LC_SPEED                           = 6 ; Taboo Levelcrush speed, irrelevant if u
                                      ; the IRQs must run via $FFFE/F, since the ROM is disabled when accessing the RAM at $D000-$DFFF
                                      ; this is not needed when only memdecompressing to $D000..$DFFF (simply set $01 to $30 and jsr memdecomp in that case)
 
-.define MEM_DECOMP_API             0 ; include a routine for memory decompression, that is, loading and decompression can be separated.
+.define MEM_DECOMP_API             1 ; include a routine for memory decompression, that is, loading and decompression can be separated.
                                      ; C-64: decompression to $D000..$DFFF need not have LOAD_UNDER_D000_DFFF enabled,
                                      ; just enable 64 kB of RAM before jsr memdecomp.
                                      ; requires DECOMPRESSOR != DECOMPRESSORS::NONE
                                      ; this option does not implicitly turn on the LOAD_RAW_API
 
-.define MEM_DECOMP_TO_API          0 ; if carry is set on decompression, the decompressor will use the address set in decdestlo/decdesthi as
+.define MEM_DECOMP_TO_API          1 ; if carry is set on decompression, the decompressor will use the address set in decdestlo/decdesthi as
                                      ; decompression destination address and ignore the file's decompression address.
                                      ; requires MEM_DECOMP_API != 0
 
