@@ -170,6 +170,7 @@ $(DISKIMAGE): $(ASSEMBLE) $(PIC1) $(PIC2)
 	 -write $(SIGNC) "signcol" \
 	 -write $(SIGN) "sign" \
 	 -write c_pack.tc "cpack" \
+	 -write run_pack.tc "runpack" \
 	 -write runsc.tc "runsc" \
 	 -write runco.tc "runco" \
 	 -write pillsc.tc "pillsc" \

@@ -1013,6 +1013,8 @@ filename2:  .asciiz "sign"
 
 cpack: .asciiz  "cpack"
 
+runpack: .asciiz  "runpack"
+
 runsc: .asciiz  "runsc"
 runco: .asciiz  "runco"
 
@@ -1159,7 +1161,7 @@ frame2: .byte 0
 frame3: .byte 0
 partpattlen: .byte 2,2,2,3,6,4,4
 partpattextra: .byte 1,1,1,2,254,1,2
-demoparts: .word  dologo, domem, dopatient, dotalkandrun, dosign, dorun, dopatient
+demoparts: .word  dologo, domem, dopatient, dorunner, dosign, dotalker, dopatient
 
 extracount: .byte 0
 partframes: .byte 0
@@ -1227,6 +1229,8 @@ runinit:
 runindex:
 	.byte 0
 
+;; for talk anim
+
 compdataoffsets:
 	.word $6000, $6735, $69BB, $712D, $73E8, $7B65, $7E28, $859D
 
@@ -1241,7 +1245,30 @@ runtimes:
 screenflip:
 	.byte 0
 
-dorun:
+dorunner:
+
+	lda runinit
+	cmp #0
+	bne rundo_start
+
+    lda #%00100000 ; screen off
+	sta $ff06
+
+	ldx #<runpack
+	ldy #>runpack
+	jsr loadraw
+
+	lda #1
+	sta runinit
+
+	lda #0
+	sta runindex
+
+    lda #%00011000 ; mc
+	sta $ff07
+
+
+dotalker:
 
 	lda runinit
 	cmp #0
