@@ -101,7 +101,7 @@ LC_SPEED                           = 6 ; Taboo Levelcrush speed, irrelevant if u
                                      ; (i.e., the loader's directory can be relocated to hide it from the normal directory command).
                                      ; DIRTRACK must be 18 when LOAD_VIA_KERNAL_FALLBACK != 0
 
-.define FILENAME_MAXLENGTH        16 ; maximum length of file name, if a directory is capable of holding longer names, extra characters are ignored,
+.define FILENAME_MAXLENGTH        8 ; maximum length of file name, if a directory is capable of holding longer names, extra characters are ignored,
                                      ; to facilitate dir-art, set to, e.g., 2, then load files as "01*", "02*", etc.
 
 

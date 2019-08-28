@@ -973,7 +973,7 @@ ptr: .word 0
 frame: .byte 0
 frame2: .byte 0
 frame3: .byte 0
-partpattlen: .byte 2,2,2,3,6,4,4
+partpattlen: .byte 2,2,2,15,6,4,4
 partpattextra: .byte 1,1,1,2,254,1,2
 demoparts: .word  dologo, domem, dopatient, dorunner, dosign, dotalker, dopatient
 
@@ -1068,6 +1068,13 @@ runtimes:
 screenflip:
 	.byte 0
 
+runscroll:
+	.byte 0
+
+runscrolltimes:
+	.byte 15
+
+
 dorunner:
 
 	lda runinit
@@ -1148,10 +1155,55 @@ talkerlogic1:
 
 runnerlogic1:
 
+    lda #%00001000 ; hires + scroll 7
+    clc
+    sbc runscroll
+	sta $ff07
+
+	inc runscroll
+
+	lda runscroll
+	cmp #8
+	bne no_runscrollreset
+	lda #0
+	sta runscroll
+no_runscrollreset:
+	lda runscroll
+	cmp #7
+	bne no_scrolloffsetting
+	dec runscrolltimes
+
+	lda runscrolltimes
+	cmp #0
+	bne no_scrolloffsetting
+	lda #8
+	sta runscrolltimes
+
+no_scrolloffsetting:
+
 	lda decdestoffsets2+1,x
 	sta decdesthi
 
 	lda decdestoffsets2,x
+
+	ldy runtimes
+	cpy #0
+	bne nosp
+	clc
+	adc runscrolltimes
+	adc runscrolltimes
+	adc runscrolltimes
+	adc runscrolltimes
+	adc runscrolltimes
+	adc runscrolltimes
+	adc runscrolltimes
+	adc runscrolltimes
+	jmp ddddd
+nosp:	
+	clc
+	adc runscrolltimes
+ddddd:
+
 	sta decdestlo
 
 	lda compdataoffsets2+1,x
@@ -1172,8 +1224,12 @@ commonlogic:
 	inc runtimes
 	lda runtimes
 	cmp #2
-	bne rundo
+	bne rundo22
+	jmp flipper
+rundo22:
+	jmp rundo
 
+flipper:
 	inc screenflip
 	lda screenflip
 	cmp #2
@@ -1224,11 +1280,13 @@ flipdone:
 longerlogic:
 
 	lda runindex
-	cmp #32
+	cmp #16
 	bne runexit
 
 	lda #0
 	sta runindex
+
+
 
 runexit:
 	jmp mainloop
