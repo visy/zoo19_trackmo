@@ -938,7 +938,7 @@ ptr: .word 0
 frame: .byte 0
 frame2: .byte 0
 frame3: .byte 0
-partpattlen: .byte 2,2,2,15,6,4,4
+partpattlen: .byte 2,2,2,3,6,4,4
 partpattextra: .byte 1,1,1,2,254,1,2
 demoparts: .word  dologo, domem, dopatient, dorunner, dosign, dotalker, dopatient
 
@@ -1021,8 +1021,7 @@ decdestoffsets:
 ;; for run anim
 
 compdataoffsets2:
-	.word $6000, $64A7, $660A, $6ABC, $6C23, $70FC, $726A, $7724, $7885, $7D31, $7E92, $8348, $84AD, $897C, $8AE6, $8FAA
-
+	.word $6200, $66A7, $680A, $6CBC, $6E23, $72FC, $746A, $7924, $7A85, $7F31, $8092, $8548, $86AD, $8B7C, $8CE6, $91AA
 
 decdestoffsets2:
 	.word $4000, $0800, $A000, $C000, $4000, $0800, $A000, $C000, $4000, $0800, $A000, $C000, $4000, $0800, $A000, $C000
@@ -1038,7 +1037,6 @@ runscroll:
 
 runscrolltimes:
 	.byte 7
-
 
 dorunner:
 
@@ -1245,15 +1243,52 @@ flipdone:
 
 longerlogic:
 
+	lda #$71
+	sta $0C00
+	sta $0C01
+	sta $0C02
+	sta $0C03
+	sta $0C04
+	sta $0C05
+	sta $0C06
+	sta $0800
+	sta $0801
+	sta $0802
+	sta $0803
+	sta $0804
+	sta $0805
+	sta $0806
+	sta $C000
+	sta $c001
+	sta $c002
+	sta $c003
+	sta $c004
+	sta $c005
+	sta $c006
+	sta $c400
+	sta $c401
+	sta $c402
+	sta $c403
+	sta $c404
+	sta $c405
+	sta $c406
+
+	ldx #0
+cleartop:
+	lda #0
+	sta $4000,x
+	sta $A000,x
+	inx
+	cpx #64
+	bne cleartop
+
+
 	lda runindex
 	cmp #32
 	bne runexit
 
 	lda #0
 	sta runindex
-
-
-
 runexit:
 	jmp mainloop
 
