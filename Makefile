@@ -169,6 +169,7 @@ $(DISKIMAGE): $(ASSEMBLE) $(PIC1) $(PIC2)
 	 -write out.prg "$(NAME)" \
 	 -write $(SIGNC) "signcol" \
 	 -write $(SIGN) "sign" \
+	 -write "sief_gra.tc" "siefgra" \
 	 -write c_pack.tc "cpack" \
 	 -write run_pack.tc "runpack" \
 	 -write runsc.tc "runsc" \
