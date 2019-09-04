@@ -72,6 +72,11 @@ zero_bits  = COLOUR_MEDIUMGREY
 		    lda #>irq_vector
 		    sta $FFFF           ; The $ 314 / $ 315 vector points to the IRQ raster routine
 
+		    lda #%00000010  ;; use interrupt source: raster counter
+		    sta $ff0a
+		    lda #1
+		    sta $ff0b ;; raster counter val
+
 		    lda #$00
 		    jsr $1600           ; Initialize sid to play song 0
 
@@ -876,10 +881,11 @@ x1: .byte 0
 x2: .byte 0 
 xt: .byte 0
 
+rastercnt: .byte 0
+
 lumavals: .byte 32,64,128,82,14,55,191
 
-
-	irq_vector:
+irq_vector: ;;; start of frame
 	pha
 	txa
 	pha
@@ -887,6 +893,85 @@ lumavals: .byte 32,64,128,82,14,55,191
 	pha
 
 	asl $ff09
+
+	lda demopart
+	cmp #3
+	bne gotoplayer
+
+	lda runinit
+	cmp #2
+	bne gotoplayer
+
+	nop
+	nop
+	nop
+	nop
+
+	lda #$f1
+	sta $ff19 ;; border
+now:
+	clc
+	lda $ff1d
+	cmp #$c9
+	bcc do_screen_irq
+gotoplayer:
+    lda #<irq_vector2    ; Set IRQ vector to be called
+    sta $FFFE           ; Once per screen refresh
+    lda #>irq_vector2
+    sta $FFFF           ; The $ 314 / $ 315 vector points to the IRQ raster routine
+
+    jmp screen_irq_done
+
+do_screen_irq:
+
+    lda #<irq_vector    ; Set IRQ vector to be called
+    sta $FFFE           ; Once per screen refresh
+    lda #>irq_vector
+    sta $FFFF           ; The $ 314 / $ 315 vector points to the IRQ raster routine
+
+
+screen_irq_done:
+
+    inc rastercnt
+    inc rastercnt
+    inc rastercnt
+
+    lda #%00000010  ;; use interrupt source: raster counter
+    sta $ff0a
+    lda rastercnt
+    sta $ff0b ;; raster counter val
+    pla
+    tay
+    pla
+    tax
+    pla
+    rti    
+
+irq_vector2: ;;; timers, partlogic, music player
+	pha
+	txa
+	pha
+	tya
+	pha
+
+	asl $ff09
+
+	lda #0
+ 	sta $ff19 ;; border
+	sta $ff15
+
+	lda #0
+	sta rastercnt
+
+    lda #<irq_vector    ; Set IRQ vector to be called
+    sta $FFFE           ; Once per screen refresh
+    lda #>irq_vector
+    sta $FFFF           ; The $ 314 / $ 315 vector points to the IRQ raster routine
+
+    lda #%00000010  ;; use interrupt source: raster counter
+    sta $ff0a
+    lda #1
+    sta $ff0b ;; raster counter val
 
 	inc frame
 
