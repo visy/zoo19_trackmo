@@ -603,6 +603,8 @@ patientspecial:
 signcolors: .byte $5c,$1b,$7a,$d3,$5c,$1b,$7a,$d3,0
 signcolor: .byte 0
 
+signindex: .byte 0
+
 dosign:
 	lda signinit
 	cmp #1
@@ -614,6 +616,7 @@ dosign:
 	lda #0
 	sta $ff19
 	sta frame
+	
 	lda #1
 	sta frame3
 
@@ -625,13 +628,14 @@ dosign:
     ldy #>filename1
     jsr loadcompd
 
+    ldx #<siefsid
+    ldy #>siefsid
+    jsr loadcompd
+
     ldx #<siefgra
     ldy #>siefgra
     jsr loadcompd
 
-
-    lda #0
-    sta partpatts
 
 	lda #$0
  	sta $ff15 ; bgcolor
@@ -648,8 +652,30 @@ dosign:
 
 signdone:
 
+	lda partpatts
+	cmp #4
+
+	bne sign_nochange
+
+	lda signindex
+	cmp #0
+	bne sign_nochange
+
+	lda #33
+	sta frame3
+	lda #0
+	sta frame
+
+	lda #$48 ;siefgra at 4800
+	sta signaddy+1
+
+	inc signindex
+
+sign_nochange:
+
 	lda #<pixbuf
 	sta memcpyLen
+signaddy:
 	lda #>pixbuf
 	sta memcpyLen+1
 
@@ -815,6 +841,7 @@ cpack: .asciiz  "cpack"
 runpack: .asciiz  "runpack"
 
 siefgra: .asciiz  "siefgra"
+siefsid: .asciiz  "siefsid"
 
 quadsc: .asciiz "quadsc"
 quadco: .asciiz "quadco"
@@ -865,7 +892,7 @@ lumavals: .byte 32,64,128,82,14,55,191
 
 	inc frame2
 	lda frame2
-	cmp #128
+	cmp #64
 	bne notframe2
 	lda frame3
 	clc
