@@ -1105,7 +1105,7 @@ frame3: .byte 0
 
 ;;;;;;;;;;;;;;;;;;;; demopart lengths, extra databyte, pointer to function
 
-partpattlen: .byte 2,2,2,2,6,4,4
+partpattlen: .byte 2,2,2,3,6,4,4
 partpattextra: .byte 1,1,1,202,254,1,2
 demoparts: .word  dologo, domem, dopatient, dorunner, dosign, dotalker, dopatient
 
@@ -1193,10 +1193,10 @@ decdestoffsets:
 ;; for run anim
 
 compdataoffsets2:
-.word $6200, $66A7, $680A, $6CBC, $6E23, $72FC, $746A, $7924, $7A85, $7F31, $8092, $8548, $86AD, $8B7C, $8CE6, $91AA
+.word $6200, $64F1, $6625, $6923, $6A56, $6D7A, $6EB3, $71B2, $72E2, $75D5, $7707, $7A05, $7B35, $7E53, $7F8E, $829F
 
 decdestoffsets2:
-.word $4000, $0800, $A000, $C000, $4000, $0800, $A000, $C000, $4000, $0800, $A000, $C000, $4000, $0800, $A000, $C000
+.word $4F00, $09E0, $AF00, $C1E0, $4F00, $09E0, $AF00, $C1E0, $4F00, $09E0, $AF00, $C1E0, $4F00, $09E0, $AF00, $C1E0
 
 runtimes:
 .byte 0
@@ -1208,7 +1208,7 @@ runscroll:
 .byte 0
 
 runscrolltimes:
-.byte 6
+.byte 8
 
 ;;;;;;;;;;;;;;;;;;;;;;;; demopart runner
 
@@ -1216,7 +1216,14 @@ dorunner:
 
 lda runinit
 cmp #0
-bne rundo_start
+bne rundo_start2
+
+jmp dorunneriniter
+
+rundo_start2:
+jmp rundo_start
+
+dorunneriniter:
 
 lda #%00100000 ; screen off
 sta $ff06
@@ -1224,6 +1231,72 @@ sta $ff06
 ldx #<runpack
 ldy #>runpack
 jsr loadraw
+
+lda #0
+ldx #0
+
+runclrloop:
+
+lda #0
+sta $4000,x
+sta $4100,x
+sta $4200,x
+sta $4300,x
+sta $4400,x
+sta $4500,x
+sta $4600,x
+sta $4700,x
+sta $4800,x
+sta $4900,x
+sta $4a00,x
+sta $4b00,x
+sta $4c00,x
+sta $4d00,x
+sta $4e00,x
+
+sta $a000,x
+sta $a100,x
+sta $a200,x
+sta $a300,x
+sta $a400,x
+sta $a500,x
+sta $a600,x
+sta $a700,x
+sta $a800,x
+sta $a900,x
+sta $aa00,x
+sta $ab00,x
+sta $ac00,x
+sta $ad00,x
+sta $ae00,x
+
+inx
+cpx #0
+bne runclrloop 
+
+lda #0
+ldx #$df
+
+runclrloop2:
+
+lda #$70
+sta $0900,x
+sta $C100,x
+dex
+cpx #255
+bne runclrloop2
+
+lda #0
+ldx #0
+
+runclrloop3:
+
+lda #$70
+sta $0800,x
+sta $C000,x
+inx
+cpx #0
+bne runclrloop3
 
 lda #2
 sta runinit
@@ -1292,12 +1365,6 @@ jmp commonlogic
 
 runnerlogic1:
 
-
-lda #%00001000 ; hires + scroll 7
-clc
-sbc runscroll
-sta $ff07
-
 inc runscroll
 
 lda runscroll
@@ -1355,6 +1422,11 @@ sty loadaddrhi
 
 sec
 jsr memdecomp ;; decomp to memory based on offset tables
+
+lda #%00001000 ; hires + scroll 7
+clc
+sbc runscroll
+sta $ff07
 
 inc runindex
 inc runindex
@@ -1417,35 +1489,16 @@ jmp runexit
 
 longerlogic:
 
+ldx #7
+colclr:
 lda #$71
-sta $0C00
-sta $0C01
-sta $0C02
-sta $0C03
-sta $0C04
-sta $0C05
-sta $0C06
-sta $0800
-sta $0801
-sta $0802
-sta $0803
-sta $0804
-sta $0805
-sta $0806
-sta $C000
-sta $c001
-sta $c002
-sta $c003
-sta $c004
-sta $c005
-sta $c006
-sta $c400
-sta $c401
-sta $c402
-sta $c403
-sta $c404
-sta $c405
-sta $c406
+sta $0C00,x
+sta $0800,x
+sta $C000,x
+sta $c400,x
+dex
+cpx #255
+bne colclr
 
 ldx #0
 cleartop:

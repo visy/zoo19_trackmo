@@ -1,0 +1,3 @@
+save "screen.bin" 0 4f00 5fff
+save "color.bin" 0 19e0 1fff
+stop
