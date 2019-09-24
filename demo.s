@@ -893,7 +893,6 @@ ror
 ror 
 ror 
 ror 
-ror 
 and #7
 clc
 adc #%00001000 
@@ -912,7 +911,6 @@ lda runinit
 cmp #2
 bne gotoplayer
 
-nop 
 nop 
 nop 
 nop 
@@ -981,8 +979,30 @@ pha
 
 asl $ff09
 
+
+lda demopart
+cmp #3
+bne noblack
+lda runinit
+cmp #2
+bne noblack
+
+ldx #0
+asl $1000,x
+asl $1000,x
+asl $1000,x
+asl $1000,x
+asl $1000,x
+asl $1000,x
+asl $1000,x
+
 lda #0
 sta $ff19 ;; border
+noblack:
+
+
+
+lda #0
 sta $ff15
 
 lda #0
@@ -1181,7 +1201,7 @@ runscroll:
 .byte 0
 
 runscrolltimes:
-.byte 7
+.byte 6
 
 ;;;;;;;;;;;;;;;;;;;;;;;; demopart runner
 
