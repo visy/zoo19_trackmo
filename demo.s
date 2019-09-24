@@ -161,9 +161,13 @@ sta changesong
 lda #0
 sta $ff11
 
+lda #%00100000 ; screen off
+sta $ff06
+
 ldx #<music2
 ldy #>music2
 jsr loadcompd
+
 
 lda #$00
 jsr $1600           ; Initialize sid to play song 0
@@ -1098,8 +1102,8 @@ frame3: .byte 0
 
 ;;;;;;;;;;;;;;;;;;;; demopart lengths, extra databyte, pointer to function
 
-partpattlen: .byte 2,2,2,3,6,4,4
-partpattextra: .byte 1,1,1,2,254,1,2
+partpattlen: .byte 2,2,2,2,6,4,4
+partpattextra: .byte 1,1,1,202,254,1,2
 demoparts: .word  dologo, domem, dopatient, dorunner, dosign, dotalker, dopatient
 
 extracount: .byte 0
@@ -1457,6 +1461,7 @@ bne runexit
 lda #0
 sta runindex
 runexit:
+
 jmp mainloop
 
 ;;;;;;;;;;;;; more data
