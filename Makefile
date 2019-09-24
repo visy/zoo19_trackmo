@@ -173,16 +173,14 @@ $(DISKIMAGE): $(ASSEMBLE) $(PIC1) $(PIC2)
 	 -write "sief_sid.tc" "siefsid" \
 	 -write c_pack.tc "cpack" \
 	 -write run_pack.tc "runpack" \
-	 -write runsc.tc "runsc" \
-	 -write runco.tc "runco" \
-	 -write pillsc.tc "pillsc" \
-	 -write pillco.tc "pillco" \
 	 -write $(QUADSC) "quadsc" \
 	 -write $(QUADCO) "quadco" \
 	 -write $(HALPSC) "halpsc" \
 	 -write $(HALPCO) "halpco" \
 	 -write "logosc.tc" "logosc" \
 	 -write "logoco.tc" "logoco" \
+	 -write pillco.tc "pillco" \
+	 -write pillsc.tc "pillsc" \
 	 -write "music2.tc" "music2" \
 	 -write "tekstico.tc" "tekstico" \
 	 -write "tekstisc.tc" "tekstisc"

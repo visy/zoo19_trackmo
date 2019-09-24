@@ -511,10 +511,17 @@ sta $ff15 ; bgcolor
 lda #%00001000 ; color at $0800
 sta $ff14
 
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+
 ldx #<pillco
 ldy #>pillco
 jsr loadcompd
-
 
 ldx #<pillsc
 ldy #>pillsc
