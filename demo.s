@@ -164,6 +164,9 @@ sta $ff11
 lda #%00100000 ; screen off
 sta $ff06
 
+lda #%00010000 ; ted stop
+sta $ff07 ; ted stop
+
 ldx #<music2
 ldy #>music2
 jsr loadcompd
