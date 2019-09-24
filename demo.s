@@ -1105,8 +1105,8 @@ frame3: .byte 0
 
 ;;;;;;;;;;;;;;;;;;;; demopart lengths, extra databyte, pointer to function
 
-partpattlen: .byte 2,2,2,3,6,4,4
-partpattextra: .byte 1,1,1,202,254,1,2
+partpattlen: .byte 2,2,2,2,6,4,4
+partpattextra: .byte 1,1,1,30,254,1,2
 demoparts: .word  dologo, domem, dopatient, dorunner, dosign, dotalker, dopatient
 
 extracount: .byte 0
@@ -1423,10 +1423,16 @@ sty loadaddrhi
 sec
 jsr memdecomp ;; decomp to memory based on offset tables
 
+lda demopart
+cmp #3
+bne noscroll33
+
 lda #%00001000 ; hires + scroll 7
 clc
 sbc runscroll
 sta $ff07
+
+noscroll33:
 
 inc runindex
 inc runindex
@@ -1492,6 +1498,10 @@ longerlogic:
 ldx #7
 colclr:
 lda #$71
+sta $0de0,x
+sta $09e0,x
+sta $C1e0,x
+sta $c5e0,x
 sta $0C00,x
 sta $0800,x
 sta $C000,x
@@ -1503,6 +1513,8 @@ bne colclr
 ldx #0
 cleartop:
 lda #0
+sta $4f00,x
+sta $Af00,x
 sta $4000,x
 sta $A000,x
 inx
