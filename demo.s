@@ -618,6 +618,9 @@ sta frame
 lda #1
 sta frame3
 
+nop
+
+
 ldx #<filename2
 ldy #>filename2
 jsr loadcompd
@@ -918,7 +921,7 @@ cmp #$c9
 bcc do_screen_irq
 gotoplayer2:
 lda demopart ;4
-cmp #3 ;2
+cmp #2 ;2
 bne gotoplayer ;2+1
 
 lda runinit
@@ -995,7 +998,7 @@ asl $ff09
 
 
 lda demopart
-cmp #3
+cmp #2
 bne noblack
 lda runinit
 cmp #2
@@ -1112,9 +1115,9 @@ frame3: .byte 0
 
 ;;;;;;;;;;;;;;;;;;;; demopart lengths, extra databyte, pointer to function
 
-partpattlen: .byte 2,2,2,2,6,4,4
-partpattextra: .byte 1,1,1,30,254,1,2
-demoparts: .word  dologo, domem, dopatient, dorunner, dosign, dotalker, dopatient
+partpattlen: .byte 1,2,1,2,6,4,4
+partpattextra: .byte 64,1,220,1,254,1,2
+demoparts: .word  dologo, domem, dorunner, dopatient, dosign, dotalker, dopatient
 
 extracount: .byte 0
 partframes: .byte 0
@@ -1190,10 +1193,44 @@ runindex:
 ;; for talk anim
 
 compdataoffsets:
-.word $6000, $6735, $69BB, $712D, $73E8, $7B65, $7E28, $859D
+
+
+;;;;;;4      4
+.word $7E28, $859D
+;;;;;;3      3
+.word $73E8, $7B65
+;;;;;;3      3
+.word $73E8, $7B65
+;;;;;;4      4
+.word $7E28, $859D
+;;;;;;2      2      
+.word $69BB, $712D 
+;;;;;;1      1      
+.word $6000, $6735
+;;;;;;4      4
+.word $7E28, $859D
+;;;;;;4      4
+.word $7E28, $859D
+;;;;;;3      3
+.word $73E8, $7B65
+;;;;;;4      4
+.word $7E28, $859D
+;;;;;;2      2      
+.word $69BB, $712D 
+;;;;;;4      4
+.word $7E28, $859D
+;;;;;;3      3
+.word $73E8, $7B65
+;;;;;;2      2      
+.word $69BB, $712D 
+;;;;;;1      1      
+.word $6000, $6735
+;;;;;;4      4
+.word $7E28, $859D
 
 decdestoffsets:
-.word $4000, $0800, $A000, $C000, $4000, $0800, $A000, $C000
+
+.word $4000, $0800, $A000, $C000, $4000, $0800, $A000, $C000, $4000, $0800, $A000, $C000, $4000, $0800, $A000, $C000,$4000, $0800, $A000, $C000, $4000, $0800, $A000, $C000, $4000, $0800, $A000, $C000, $4000, $0800, $A000, $C000
 
 ;; alt to 4000 and 0800 / A000 and c000
 
@@ -1431,7 +1468,7 @@ sec
 jsr memdecomp ;; decomp to memory based on offset tables
 
 lda demopart
-cmp #3
+cmp #2
 bne noscroll33
 
 lda #%00001000 ; hires + scroll 7
@@ -1492,7 +1529,7 @@ cmp #2
 beq longerlogic
 
 lda runindex
-cmp #16
+cmp #64
 bne runexit
 
 lda #0
