@@ -183,7 +183,9 @@ $(DISKIMAGE): $(ASSEMBLE) $(PIC1) $(PIC2)
 	 -write pillsc.tc "pillsc" \
 	 -write "music2.tc" "music2" \
 	 -write "tekstico.tc" "tekstico" \
-	 -write "tekstisc.tc" "tekstisc"
+	 -write "tekstisc.tc" "tekstisc" \
+	 -write "sgtex.bin" "sgtex" \
+	 -write "sgcol.tc" "sgcol" 
 	 
 
 

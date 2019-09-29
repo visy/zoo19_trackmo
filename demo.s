@@ -606,8 +606,11 @@ signindex: .byte 0
 dosign:
 lda signinit
 cmp #1
-beq signdone
-
+beq signdone2
+jmp singasasas
+signdone2:
+	jmp signdone
+singasasas:
 lda #%00100000 ; screen off
 sta $ff06
 
@@ -619,6 +622,52 @@ lda #1
 sta frame3
 
 nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+
+ldx #<siefsid
+ldy #>siefsid
+jsr loadcompd
 
 
 ldx #<filename2
@@ -629,14 +678,16 @@ ldx #<filename1
 ldy #>filename1
 jsr loadcompd
 
-ldx #<siefsid
-ldy #>siefsid
-jsr loadcompd
 
-ldx #<siefgra
-ldy #>siefgra
-jsr loadcompd
 
+ldx #120
+colortext2:
+lda #0
+sta $0f70,x
+sta $0b70,x
+dex
+cpx #255
+bne colortext2
 
 lda #$0
 sta $ff15 ; bgcolor
@@ -650,8 +701,39 @@ lda tedvidoffs,x
 clc
 sta $ff12
 
+ldx #<siefsid
+ldy #>siefsid
+jsr loadcompd
+
+ldx #<siefgra
+ldy #>siefgra
+jsr loadcompd
+
+ldx #<siefsid
+ldy #>siefsid
+jsr loadcompd
+
 
 signdone:
+
+
+lda signindex
+cmp #0
+beq nobottomcolor
+
+ldx #120
+ldy frame
+colortext:
+lda #64
+sta $0f70,x
+lda fadetab,y
+and #$0f
+sta $0b70,x
+dex
+cpx #255
+bne colortext
+
+nobottomcolor:
 
 lda partpatts
 cmp #4
@@ -669,6 +751,16 @@ sta frame
 
 lda #$48 ;siefgra at 4800
 sta signaddy+1
+
+lda #%00100000 ; screen off
+sta $ff06
+
+ldx #<sgtex
+ldy #>sgtex
+jsr loadraw
+
+lda #%00110000 ; no blank, bitmap
+sta $ff06
 
 inc signindex
 
@@ -792,8 +884,6 @@ lda signinit
 cmp #1
 beq nosignon
 
-lda #%00011000 ; mc
-sta $ff07
 lda #%00110000 ; no blank, bitmap
 sta $ff06
 
@@ -844,6 +934,9 @@ runpack: .asciiz  "runpack"
 
 siefgra: .asciiz  "siefgra"
 siefsid: .asciiz  "siefsid"
+
+sgcol: .asciiz  "sgcol"
+sgtex: .asciiz  "sgtex"
 
 quadsc: .asciiz "quadsc"
 quadco: .asciiz "quadco"
@@ -910,6 +1003,7 @@ ror
 ror 
 ror 
 ror 
+ror 
 and #7
 clc
 adc #%00001000 
@@ -940,6 +1034,37 @@ lda $ff1d
 cmp #$c9
 bcc do_screen_irq
 gotoplayer:
+
+lda demopart
+cmp #4
+bne gotoplayer0
+
+nop 
+nop 
+nop 
+
+
+clc
+lda $ff1d
+cmp #176
+bcc nohires
+
+lda #%00001000 ; hires
+sta $ff07
+
+jmp mcmzcz
+
+nohires:
+lda #%00011000 ; mc
+sta $ff07
+
+mcmzcz:
+
+lda $ff1d
+cmp #$c9
+bcc do_screen_irq
+
+gotoplayer0:
 
 lda #<irq_vector2    ; Set IRQ vector to be called
 sta $FFFE           ; Once per screen refresh
