@@ -480,12 +480,86 @@ logowipe2: .byte 0
 ;;;;;;;;;;;;;; demopart ;;;;;;;;;;;;;  PATIENT
 
 patientinit: .byte 0
+patientinit2: .byte 0
+
+dopatient2:
+
+
+lda patientinit2
+cmp #1
+beq dopatient22
+
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+
+lda #%00100000 ; screen off
+sta $ff06
+
+nop
+nop
+
+ldx #<pillsc
+ldy #>pillsc
+jsr loadcompd
+
+nop
+nop
+
+ldx #<pillco
+ldy #>pillco
+jsr loadcompd
+
+nop
+nop
+
+ldx #<pillco
+ldy #>pillco
+jsr loadcompd
+
+ldx #1
+lda tedvidoffs,x
+clc
+sta $ff12
+
+lda #$3b ; no blank, bitmap
+sta $ff06
+lda #$00
+sta $ff19 ; border
+lda #$80
+sta $ff15 ; bgcolor
+
+lda #%00001000 ; color at $0800
+sta $ff14
+
+lda #%00011000 ; mc
+sta $ff07
+
+
+inc patientinit2
+
+dopatient22:
+
+jmp mainloop
+
 
 dopatient:
 
+nop
+nop
+nop
+nop
+nop
+nop
+
 lda patientinit
 cmp #1
-beq dopatient2
+beq dopatient2zz
 
 lda #%00100000 ; screen off
 sta $ff06
@@ -503,32 +577,6 @@ jmp patient0
 
 patientspecialinit:
 
-lda #$00
-sta $ff19 ; border
-lda #$80
-sta $ff15 ; bgcolor
-
-lda #%00001000 ; color at $0800
-sta $ff14
-
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-
-ldx #<pillco
-ldy #>pillco
-jsr loadcompd
-
-ldx #<pillsc
-ldy #>pillsc
-jsr loadcompd
-
-lda #%00011000 ; mc
-sta $ff07
 
 
 jmp patmutual
@@ -567,7 +615,7 @@ sta $ff06
 lda #1
 sta patientinit
 
-dopatient2:
+dopatient2zz:
 
 ldx demopart
 lda partpattextra,x
@@ -682,7 +730,7 @@ jsr loadcompd
 
 ldx #120
 colortext2:
-lda #0
+lda #64
 sta $0f70,x
 sta $0b70,x
 dex
@@ -723,11 +771,12 @@ beq nobottomcolor
 
 ldx #120
 ldy frame
-colortext:
-lda #64
-sta $0f70,x
+
 lda fadetab,y
 and #$0f
+sta $d1
+colortext:
+lda $d1
 sta $0b70,x
 dex
 cpx #255
@@ -1240,9 +1289,9 @@ frame3: .byte 0
 
 ;;;;;;;;;;;;;;;;;;;; demopart lengths, extra databyte, pointer to function
 
-partpattlen: .byte 1,2,1,2,6,4,4
-partpattextra: .byte 64,1,220,1,254,1,2
-demoparts: .word  dologo, domem, dorunner, dopatient, dosign, dotalker, dopatient
+partpattlen: .byte 1,2,1,2,6,4,2
+partpattextra: .byte 64,1,220,1,254,1,1
+demoparts: .word  dologo, domem, dorunner, dopatient, dosign, dotalker, dopatient2
 
 extracount: .byte 0
 partframes: .byte 0
@@ -1722,26 +1771,6 @@ sintab:
 .res $4000 - *
 
 pixbuf: ; gradient
-
-.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,110,110,110,110,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,8,8,8,8,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,8,8,8,8,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,16,16,16,16,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,16,16,16,16,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,32,32,32,32,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-.byte 0,0,0,0,0,0,0,0,0,0,0,110,110,110,110,110,110,110,32,32,32,32,110,110,110,110,110,110,110,0,0,0,0,0,0,0,0,0,0,0
-.byte 0,0,0,0,0,0,0,0,0,0,0,110,8,8,16,16,24,24,32,32,40,40,48,48,56,56,64,64,110,0,0,0,0,0,0,0,0,0,0,0
-.byte 0,0,0,0,0,0,0,0,0,0,0,110,8,8,16,16,24,24,32,32,40,40,48,48,56,56,64,64,110,0,0,0,0,0,0,0,0,0,0,0
-.byte 0,0,0,0,0,0,0,0,0,0,0,110,8,8,16,16,24,24,32,32,40,40,48,48,56,56,64,64,110,0,0,0,0,0,0,0,0,0,0,0
-.byte 0,0,0,0,0,0,0,0,0,0,0,110,8,8,16,16,24,24,32,32,40,40,48,48,56,56,64,64,110,0,0,0,0,0,0,0,0,0,0,0
-.byte 0,0,0,0,0,0,0,0,0,0,0,110,110,110,110,110,110,110,40,40,40,40,110,110,110,110,110,110,110,0,0,0,0,0,0,0,0,0,0,0
-.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,40,40,40,40,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,48,48,48,48,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,48,48,48,48,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,56,56,56,56,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,56,56,56,56,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,110,110,110,110,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-
 
 
 ;;;; all the way to the end of memory!
