@@ -1,10 +1,12 @@
-; build command:
-; make PLATFORM=c16 prg INSTALL=2300 RESIDENT=2f00 ZP=02
+; built on Tue, 01 Oct 2019 14:20:50 +0200 using
+; make PLATFORM=c16 prg INSTALL=4000 RESIDENT=fa00 ZP=02
 
 ; configuration
+config_ALLOW_2_MHZ_ON_C128      = $00
 config_DECOMPRESSOR             = $08
 config_DIRTRACK                 = $12
-config_DISABLE_WATCHDOG         = $01
+config_DIRTRACK81               = $28
+config_DISABLE_WATCHDOG         = $00
 config_END_ADDRESS_API          = $00
 config_FILENAME_MAXLENGTH       = $10
 config_IDLE_BUS_LOCK            = $00
@@ -12,7 +14,7 @@ config_LC_SPEED                 = $06
 config_LOAD_COMPD_API           = $01
 config_LOAD_RAW_API             = $01
 config_LOAD_TO_API              = $00
-config_LOAD_UNDER_D000_DFFF     = $01
+config_LOAD_UNDER_D000_DFFF     = $00
 config_LOAD_VIA_KERNAL_FALLBACK = $00
 config_MEM_DECOMP_API           = $01
 config_MEM_DECOMP_TO_API        = $01
@@ -37,13 +39,9 @@ decdesthi                       = $05
 loader_zp_last                  = $12
 
 ; install
-install                         = $2af4
+install                         = $47ea
 
 ; resident
-loadraw                         = $2f00
-loadcompd                       = $2f0b
-loadcompdexecute                = $2f0e
-loadcompdopen                   = $2f2c
-openfile                        = $2f2c
-pollblock                       = $2f9f
-memdecomp                       = $30ee
+loadraw                         = $fa00
+loadcompd                       = $fa0b
+memdecomp                       = $fbf0

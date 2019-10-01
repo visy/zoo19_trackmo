@@ -200,6 +200,20 @@ error:      ldx #COLOUR_BLACK
 stx BORDERCOLOUR
 jmp :-
 
+
+.res $1600 - *
+.incbin "music.bin"
+
+.res $3800 - *
+pixbuf: ; gradient
+.incbin "sief_sid.bin",2
+.res $3b00 - *
+.incbin "sief_gra.bin",2
+
+.res $4000 - *
+.incbin "install-c16.prg", 2
+
+.res $e000 -*
 logoinit: .byte 0
 
 ;;;;;;;;;;; GET/PUTPIXEL
@@ -489,37 +503,15 @@ lda patientinit2
 cmp #1
 beq dopatient22
 
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-
 lda #%00100000 ; screen off
 sta $ff06
 
-nop
-nop
+ldx #<pillco
+ldy #>pillco
+jsr loadcompd
 
 ldx #<pillsc
 ldy #>pillsc
-jsr loadcompd
-
-nop
-nop
-
-ldx #<pillco
-ldy #>pillco
-jsr loadcompd
-
-nop
-nop
-
-ldx #<pillco
-ldy #>pillco
 jsr loadcompd
 
 ldx #1
@@ -669,55 +661,6 @@ sta frame
 lda #1
 sta frame3
 
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-
-ldx #<siefsid
-ldy #>siefsid
-jsr loadcompd
-
-
 ldx #<filename2
 ldy #>filename2
 jsr loadcompd
@@ -748,19 +691,6 @@ ldx #2
 lda tedvidoffs,x
 clc
 sta $ff12
-
-ldx #<siefsid
-ldy #>siefsid
-jsr loadcompd
-
-ldx #<siefgra
-ldy #>siefgra
-jsr loadcompd
-
-ldx #<siefsid
-ldy #>siefsid
-jsr loadcompd
-
 
 signdone:
 
@@ -798,7 +728,7 @@ sta frame3
 lda #0
 sta frame
 
-lda #$48 ;siefgra at 4800
+lda #$3b ;siefgra at 3b00
 sta signaddy+1
 
 lda #%00100000 ; screen off
@@ -962,14 +892,6 @@ rts
 
 tedvidoffs: .byte 8,16,24,32,40,48,56
 
-.res $1600 - *
-.incbin "music.bin"
-
-.res $2300 - *
-.incbin "install-c16.prg", 2
-
-.res $2f00 - *
-.incbin "loader-c16.prg", 2
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -980,9 +902,6 @@ filename2:  .asciiz "sign"
 cpack: .asciiz  "cpack"
 
 runpack: .asciiz  "runpack"
-
-siefgra: .asciiz  "siefgra"
-siefsid: .asciiz  "siefsid"
 
 sgcol: .asciiz  "sgcol"
 sgtex: .asciiz  "sgtex"
@@ -1768,9 +1687,9 @@ sintab:
 .byte 18, 20, 21, 23, 25, 27, 29, 31, 33, 35, 37, 40, 42, 44, 47, 49, 52, 54, 57, 59, 62
 .byte 65, 67, 70, 73, 76, 79, 82, 85, 88, 90, 93, 97, 100, 103, 106, 109, 112, 115, 118, 121, 124
 
-.res $4000 - *
 
-pixbuf: ; gradient
+.res $fa00 - *
+.incbin "loader-c16.prg", 2
 
 
 ;;;; all the way to the end of memory!
