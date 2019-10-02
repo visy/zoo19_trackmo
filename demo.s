@@ -3,7 +3,7 @@ memcpySrc = $f4
 memcpyDst = $f6
 memcpyLen = $f8
 
-.include "loadersymbols-c16.inc"
+.include "../../build/loadersymbols-c16.inc"
 
 .include "standard.inc"
 .include "ted.inc"
@@ -38,25 +38,6 @@ jsr install
 sei
 
 sta $ff3f
-
-ldx #<quadco
-ldy #>quadco
-jsr loadcompd
-
-ldx #<quadsc
-ldy #>quadsc
-jsr loadcompd
-
-ldx #5
-lda tedvidoffs,x
-clc
-sta $ff12
-
-lda #%00001000 ; hires ted on
-sta $ff07
-
-lda #%00110000 ; no blank, bitmap
-sta $ff06
 
 lda #<irq_vector    ; Set IRQ vector to be called
 sta $FFFE           ; Once per screen refresh
@@ -211,7 +192,7 @@ pixbuf: ; gradient
 .incbin "sief_gra.bin",2
 
 .res $4000 - *
-.incbin "install-c16.prg", 2
+.incbin "../../build/install-c16.prg", 2
 
 .res $e000 -*
 logoinit: .byte 0
@@ -491,124 +472,155 @@ fadetab: .byte $ef,$ee,$dd,$cc,$bb,$aa,$99,$88,$00,$00,$00,$00,$00,$00
 logowipe: .byte 0
 logowipe2: .byte 0
 
-;;;;;;;;;;;;;; demopart ;;;;;;;;;;;;;  PATIENT
+pic2init:
+	.byte 0
 
-patientinit: .byte 0
-patientinit2: .byte 0
+dopic2:
+	lda pic2init
+	cmp #1
+	beq endad
 
-dopatient2:
+	inc pic2init
+	lda #%00100000 ; screen off
+	sta $ff06
 
+	ldx #<quadco
+	ldy #>quadco
+	jsr loadcompd
 
-lda patientinit2
-cmp #1
-beq dopatient22
+	ldx #<quadsc
+	ldy #>quadsc
+	jsr loadcompd
 
-lda #%00100000 ; screen off
-sta $ff06
+	ldx #5 ;bitmap at $4000
+	lda tedvidoffs,x
+	clc
+	sta $ff12
 
-ldx #<pillco
-ldy #>pillco
-jsr loadcompd
+	lda #%00001000 ; hires
+	sta $ff07
 
-ldx #<pillsc
-ldy #>pillsc
-jsr loadcompd
+	lda #$3b ; no blank, bitmap
+	sta $ff06
 
-ldx #1
-lda tedvidoffs,x
-clc
-sta $ff12
-
-lda #$3b ; no blank, bitmap
-sta $ff06
-lda #$00
-sta $ff19 ; border
-lda #$80
-sta $ff15 ; bgcolor
-
-lda #%00001000 ; color at $0800
-sta $ff14
-
-lda #%00011000 ; mc
-sta $ff07
+endad:
+	jmp mainloop
 
 
-inc patientinit2
+dopic:
 
-dopatient22:
+	lda picinit
+	cmp #0
+	bne picdone_go
+	jmp doinitpic
+picdone_go:
+	jmp picdone
+doinitpic:
+	inc picinit
 
-jmp mainloop
+	ldx demopart
+	lda partpattdata,x
+	cmp #1
+	beq showpic1
+	cmp #2
+	beq showpic2
+	cmp #3
+	beq showpic3
+
+showpic1:
+
+	lda #%00100000 ; screen off
+	sta $ff06
+
+	ldx #<halpco
+	ldy #>halpco
+	jsr loadcompd
+
+	ldx #<halpsc
+	ldy #>halpsc
+	jsr loadcompd
+
+	lda #%00001000 ; color at $0800
+	sta $ff14
+
+	lda #$f1
+	sta $ff19 ; border
+	sta $ff15 ; bgcolor
+
+	ldx #1 ;bitmap at $4000
+	lda tedvidoffs,x
+	clc
+	sta $ff12
+
+	lda #8 
+	sta $ff07
+
+	lda #$3b ; no blank, bitmap
+	sta $ff06
+
+	jmp picdone
+
+showpic2:
+
+	lda #%00100000 ; screen off
+	sta $ff06
+
+	ldx #<pillco
+	ldy #>pillco
+	jsr loadcompd
+
+	ldx #<pillsc
+	ldy #>pillsc
+	jsr loadcompd
+
+	ldx #1 ;bitmap at $4000
+	lda tedvidoffs,x
+	clc
+	sta $ff12
+
+	lda #%00011000 ; mc
+	sta $ff07
+
+	lda #$3b ; no blank, bitmap
+	sta $ff06
+
+	jmp picdone
+
+showpic3:
+
+	lda #%00100000 ; screen off
+	sta $ff06
+
+	ldx #<pharco
+	ldy #>pharco
+	jsr loadcompd
+
+	ldx #<pharsc
+	ldy #>pharsc
+	jsr loadcompd
+
+	ldx #1 ;bitmap at $4000
+	lda tedvidoffs,x
+	clc
+	sta $ff12
+
+	lda #%00001000 ; hires
+	sta $ff07
+
+	lda #$3b ; no blank, bitmap
+	sta $ff06
+
+	jmp picdone
 
 
-dopatient:
+picdone:
 
-lda patientinit
-cmp #1
-beq dopatient2zz
+	ldx demopart
+	lda partpattdata,x
+	cmp #1
+	bne no_wobble
 
-lda #%00100000 ; screen off
-sta $ff06
-
-lda #%00011000 ; ted stop
-sta $ff07 ; ted stop
-
-;; extra 2 = show pill
-ldx demopart
-lda partpattextra,x
-cmp #2
-beq patientspecialinit
-
-jmp patient0
-
-patientspecialinit:
-
-
-
-jmp patmutual
-
-patient0:
-
-lda #$f1
-sta $ff19 ; border
-sta $ff15 ; bgcolor
-
-lda #%00001000 ; color at $0800
-sta $ff14
-
-ldx #<halpco
-ldy #>halpco
-jsr loadcompd
-
-ldx #<halpsc
-ldy #>halpsc
-jsr loadcompd
-
-lda #8 ; mc
-sta $ff07
-
-patmutual:
-
-ldx #1
-lda tedvidoffs,x
-clc
-sta $ff12
-
-lda #$3b ; no blank, bitmap
-sta $ff06
-
-
-lda #1
-sta patientinit
-
-dopatient2zz:
-
-ldx demopart
-lda partpattextra,x
-cmp #2
-beq patientspecial
-
-
-ldy #200
+ldy #50
 yloop2:
 lda #2
 sta x1
@@ -620,14 +632,22 @@ sta x2
 lda #0
 clc
 adc x2
-;sta $ff07
+and #7
+sta $FA
+lda #%00001000 ; hires + scroll 7
+clc
+sbc $FA
+sta $ff07
 
 dey
 cpy #0
 bne yloop2
 
-patientspecial:
-jmp mainloop
+no_wobble:
+
+	jmp mainloop
+
+
 
 ;;;;;;;;;;;;;; demopart ;;;;;;;;;;;;;  SIGN
 
@@ -883,11 +903,153 @@ rts
 creditspart:
 	.byte 0
 
+creditsfades:
+	.byte 0
+
 docredits:
+	lda creditspart
+	cmp #3
+	bne no_pic3fade
+
+	inc creditsfades
+	lda creditsfades
+	cmp #2
+	bne no_pic3fade
+	lda #0
+	sta creditsfades
+
+	ldx #0
+lumafade:	
+	clc
+
+	lda $0800,x
+	clc
+	cmp $4800,x
+	bcs now1
+	inc $0800,x
+now1:
+
+	lda $0900,x
+	clc
+	cmp $4900,x
+	bcs now2
+	inc $0900,x
+now2:
+
+	lda $0a00,x
+	clc
+	cmp $4a00,x
+	bcs now3
+	inc $0a00,x
+now3:
+
+	lda $0b00,x
+	clc
+	cmp $4b00,x
+	bcs now4
+	inc $0b00,x
+now4:
+	inx
+	cpx #0
+	bne lumafade
+
+no_pic3fade:
+
+	lda partpatts
+	cmp #3
+	bne no_pic3
+
+	lda creditspart
+	cmp #2
+	bne no_pic3
+
+	lda #%00100000 ; screen off
+	sta $ff06
+
+	ldx #<cred3co
+	ldy #>cred3co
+	jsr loadcompd
+
+	ldx #0
+clearluma:
+	lda #0
+	sta $0800,x
+	sta $0900,x
+	sta $0a00,x
+	sta $0b00,x
+	inx
+	cpx #0
+	bne clearluma
+
+	ldx #0
+copycolor:
+	lda $4c00,x
+	sta $0c00,x
+	lda $4d00,x
+	sta $0d00,x
+	lda $4e00,x
+	sta $0e00,x
+	lda $4f00,x
+	sta $0f00,x
+	inx
+	cpx #0
+	bne copycolor
+
+	lda #$0
+	sta $ff19 ; border
+
+	ldx #3 ;bitmap at $4000
+	lda tedvidoffs,x
+	clc
+	sta $ff12
+
+	lda #%00011000 ; mc
+	sta $ff07
+
+	lda #$3b ; no blank, bitmap
+	sta $ff06
+
+	inc creditspart
+
+no_pic3:
+
+
+	lda partpatts
+	cmp #2
+	bne no_pic2
+
+	lda creditspart
+	cmp #1
+	bne no_pic2
+
+	lda #%00100000 ; screen off
+	sta $ff06
+
+	ldx #<cred2co
+	ldy #>cred2co
+	jsr loadcompd
+
+	lda #$83
+	sta $ff19 ; border
+
+	ldx #2 ;bitmap at $6000
+	lda tedvidoffs,x
+	clc
+	sta $ff12
+
+	lda #$3b ; no blank, bitmap
+	sta $ff06
+
+	inc creditspart
+
+no_pic2:
 
 	lda creditspart
 	cmp #0
 	bne no_pic1
+
+	lda #%00100000 ; screen off
+	sta $ff06
 
 	ldx #<cred1co
 	ldy #>cred1co
@@ -895,14 +1057,6 @@ docredits:
 
 	ldx #<cred1sc
 	ldy #>cred1sc
-	jsr loadcompd
-
-	ldx #<cred2sc
-	ldy #>cred2sc
-	jsr loadcompd
-
-	ldx #<cred3sc
-	ldy #>cred3sc
 	jsr loadcompd
 
 	ldx #1 ;bitmap at $4000
@@ -913,6 +1067,18 @@ docredits:
 	lda #%00001000 ; hires
 	sta $ff07
 
+	lda #$3b ; no blank, bitmap
+	sta $ff06
+
+	ldx #<cred2sc
+	ldy #>cred2sc
+	jsr loadcompd
+
+	ldx #<cred3sc
+	ldy #>cred3sc
+	jsr loadcompd
+
+
 	inc creditspart
 no_pic1:
 
@@ -920,8 +1086,8 @@ no_pic1:
 
 	jmp mainloop
 
-
-
+picinit:
+	.byte 0
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  MUSIC AND LOADER
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1219,6 +1385,7 @@ cmp extracount
 bne nopartadd
 
 inc demopart
+
 ldx demopart
 lda partpattextra,x
 cmp #254
@@ -1235,6 +1402,7 @@ sta partframes
 sta partpatts
 sta extracount
 sta runinit
+sta picinit
 nopartadd:
 
 ; tick and output to ted
@@ -1256,9 +1424,11 @@ frame3: .byte 0
 
 ;;;;;;;;;;;;;;;;;;;; demopart lengths, extra databyte, pointer to function
 
-partpattlen: .byte 1,2,1,2,6,4,2
-partpattextra: .byte 64,1,220,1,254,1,1
-demoparts: .word  dologo, domem, dorunner, dopatient, dosign, dotalker, dopatient2
+partpattlen: .byte 1,2,1,1,6,1,2,1,4,64
+partpattextra: .byte 64,1,220,1,254,1,1,1,1,1
+partpattdata: .byte 0,0,0,1,0,3,0,2,0,4
+
+demoparts: .word  dologo, domem, dorunner, dopic, dosign, dopic, dotalker, dopic, docredits,dopic2
 
 extracount: .byte 0
 partframes: .byte 0
@@ -1496,9 +1666,6 @@ jmp mainloop
 
 dotalker:
 
-lda #0
-sta patientinit
-
 lda runinit
 cmp #0
 bne rundo_start
@@ -1518,6 +1685,7 @@ sta runindex
 
 lda #$0
 sta $ff15 ; bgcolor
+sta $ff19 ; border
 
 lda #%00011000 ; mc
 sta $ff07
@@ -1739,4 +1907,4 @@ sintab:
 ;;;; all the way to the end of memory!
 
 .res $fa00 - *
-.incbin "loader-c16.prg", 2
+.incbin "../../build/loader-c16.prg", 2
