@@ -147,7 +147,7 @@ tellarch:
 loader: $(LOADER)
 
 $(LOADER): $(LOADERCFG)
-	make -C $(LOADER_SRC) EXTCONFIGPATH=../samples/$(NAME) INSTALL=2300 RESIDENT=2f00 ZP=02 prg
+	make -C $(LOADER_SRC) EXTCONFIGPATH=../samples/$(NAME) INSTALL=2300 RESIDENT=2f00 ZP=40 prg
 
 
 $(ASSEMBLE): $(SOURCE) $(LOADER) $(LOADERCFG)
@@ -185,7 +185,15 @@ $(DISKIMAGE): $(ASSEMBLE) $(PIC1) $(PIC2)
 	 -write "tekstico.tc" "tekstico" \
 	 -write "tekstisc.tc" "tekstisc" \
 	 -write "sgtex.bin" "sgtex" \
-	 -write "sgcol.tc" "sgcol" 
+	 -write "sgcol.tc" "sgcol" \
+	 -write "cred1sc.tc" "cred1sc" \
+	 -write "cred1co.tc" "cred1co" \
+	 -write "cred2sc.tc" "cred2sc" \
+	 -write "cred2co.tc" "cred2co" \
+	 -write "cred3sc.tc" "cred3sc" \
+	 -write "cred3co.tc" "cred3co" \
+	 -write "pharsc.tc" "pharsc" \
+	 -write "pharco.tc" "pharco"
 	 
 
 

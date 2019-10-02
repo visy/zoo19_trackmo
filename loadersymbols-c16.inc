@@ -1,5 +1,5 @@
-; built on Tue, 01 Oct 2019 14:20:50 +0200 using
-; make PLATFORM=c16 prg INSTALL=4000 RESIDENT=fa00 ZP=02
+; built on Tue, 01 Oct 2019 22:59:24 +0200 using
+; make PLATFORM=c16 prg INSTALL=4000 RESIDENT=fa00 ZP=40
 
 ; configuration
 config_ALLOW_2_MHZ_ON_C128      = $00
@@ -19,7 +19,7 @@ config_LOAD_VIA_KERNAL_FALLBACK = $00
 config_MEM_DECOMP_API           = $01
 config_MEM_DECOMP_TO_API        = $01
 config_NTSC_COMPATIBILITY       = $00
-config_ONLY_1541_AND_COMPATIBLE = $01
+config_ONLY_1541_AND_COMPATIBLE = $00
 config_UNINSTALL_API            = $00
 
 ; status codes
@@ -31,15 +31,15 @@ status_DEVICE_NOT_PRESENT       = $fe
 status_FILE_NOT_FOUND           = $ff
 
 ; zeropage
-loader_zp_first                 = $02
-loadaddrlo                      = $02
-loadaddrhi                      = $03
-decdestlo                       = $04
-decdesthi                       = $05
-loader_zp_last                  = $12
+loader_zp_first                 = $40
+loadaddrlo                      = $40
+loadaddrhi                      = $41
+decdestlo                       = $42
+decdesthi                       = $43
+loader_zp_last                  = $50
 
 ; install
-install                         = $47ea
+install                         = $53e2
 
 ; resident
 loadraw                         = $fa00

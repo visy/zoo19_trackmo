@@ -542,13 +542,6 @@ jmp mainloop
 
 dopatient:
 
-nop
-nop
-nop
-nop
-nop
-nop
-
 lda patientinit
 cmp #1
 beq dopatient2zz
@@ -627,7 +620,7 @@ sta x2
 lda #0
 clc
 adc x2
-sta $ff07
+;sta $ff07
 
 dey
 cpy #0
@@ -887,6 +880,49 @@ adc #17      ; A = RND * 5 + 17
 sta rnd
 rts
 
+creditspart:
+	.byte 0
+
+docredits:
+
+	lda creditspart
+	cmp #0
+	bne no_pic1
+
+	ldx #<cred1co
+	ldy #>cred1co
+	jsr loadcompd
+
+	ldx #<cred1sc
+	ldy #>cred1sc
+	jsr loadcompd
+
+	ldx #<cred2sc
+	ldy #>cred2sc
+	jsr loadcompd
+
+	ldx #<cred3sc
+	ldy #>cred3sc
+	jsr loadcompd
+
+	ldx #1 ;bitmap at $4000
+	lda tedvidoffs,x
+	clc
+	sta $ff12
+
+	lda #%00001000 ; hires
+	sta $ff07
+
+	inc creditspart
+no_pic1:
+
+
+
+	jmp mainloop
+
+
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  MUSIC AND LOADER
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -922,6 +958,18 @@ music2: .asciiz "music2"
 
 tekstisc: .asciiz "tekstisc"
 tekstico: .asciiz "tekstico"
+
+cred1sc: .asciiz "cred1sc"
+cred1co: .asciiz "cred1co"
+
+cred2sc: .asciiz "cred2sc"
+cred2co: .asciiz "cred2co"
+
+cred3sc: .asciiz "cred3sc"
+cred3co: .asciiz "cred3co"
+
+pharsc: .asciiz "pharsc"
+pharco: .asciiz "pharco"
 
 signinit: .byte 0
 
@@ -1688,8 +1736,7 @@ sintab:
 .byte 65, 67, 70, 73, 76, 79, 82, 85, 88, 90, 93, 97, 100, 103, 106, 109, 112, 115, 118, 121, 124
 
 
+;;;; all the way to the end of memory!
+
 .res $fa00 - *
 .incbin "loader-c16.prg", 2
-
-
-;;;; all the way to the end of memory!
