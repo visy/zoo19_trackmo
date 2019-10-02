@@ -39,6 +39,10 @@ sei
 
 sta $ff3f
 
+
+
+
+
 lda #<irq_vector    ; Set IRQ vector to be called
 sta $FFFE           ; Once per screen refresh
 lda #>irq_vector
@@ -161,6 +165,17 @@ cli
 nochangesong:
 
 ;;;;; JUMP TO DEMOPART CODE
+
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
 
 lda demopart
 asl
@@ -567,11 +582,11 @@ showpic2:
 
 	ldx #<pillco
 	ldy #>pillco
-	jsr loadcompd
+	jsr loadraw
 
 	ldx #<pillsc
 	ldy #>pillsc
-	jsr loadcompd
+	jsr loadraw
 
 	ldx #1 ;bitmap at $4000
 	lda tedvidoffs,x
@@ -1424,8 +1439,8 @@ frame3: .byte 0
 
 ;;;;;;;;;;;;;;;;;;;; demopart lengths, extra databyte, pointer to function
 
-partpattlen: .byte 1,2,1,1,6,1,2,1,4,64
-partpattextra: .byte 64,1,220,1,254,1,1,1,1,1
+partpattlen: .byte 1,2,1,1,6,1,2,1,3,64
+partpattextra: .byte 65,1,220,91,254,93,1,65,200,1
 partpattdata: .byte 0,0,0,1,0,3,0,2,0,4
 
 demoparts: .word  dologo, domem, dorunner, dopic, dosign, dopic, dotalker, dopic, docredits,dopic2

@@ -179,8 +179,8 @@ $(DISKIMAGE): $(ASSEMBLE) $(PIC1) $(PIC2)
 	 -write $(HALPCO) "halpco" \
 	 -write "logosc.tc" "logosc" \
 	 -write "logoco.tc" "logoco" \
-	 -write pillco.tc "pillco" \
-	 -write pillsc.tc "pillsc" \
+	 -write pillco.bin "pillco" \
+	 -write pillsc.bin "pillsc" \
 	 -write "music2.tc" "music2" \
 	 -write "tekstico.tc" "tekstico" \
 	 -write "tekstisc.tc" "tekstisc" \
