@@ -493,9 +493,64 @@ pic2init:
 dopic2:
 	lda pic2init
 	cmp #1
-	beq endad
-
+	beq endada
+	jmp noendad
+endada:
+	jmp endad
+noendad:
 	inc pic2init
+
+	ldx demopart
+	lda partpattdata,x
+	cmp #5
+	bne no_kupla
+
+	ldx #<kuplaco
+	ldy #>kuplaco
+	jsr loadcompd
+
+	ldx #<kuplasc
+	ldy #>kuplasc
+	jsr loadcompd
+
+	lda #%00100000 ; screen off
+	sta $ff06
+
+	lda #$C1
+	sta $ff16 ; extra color
+
+	ldx #0
+copyloop:
+	lda $9800,x
+	sta $0800,x
+	lda $9900,x
+	sta $0900,x
+	lda $9a00,x
+	sta $0a00,x
+	lda $9b00,x
+	sta $0b00,x
+	lda $9c00,x
+	sta $0c00,x
+	lda $9d00,x
+	sta $0d00,x
+	lda $9e00,x
+	sta $0e00,x
+	lda $9f00,x
+	sta $0f00,x
+	inx
+	cpx #0
+	bne copyloop
+
+	ldx #2 ;bitmap at $6000
+	lda tedvidoffs,x
+	clc
+	sta $ff12
+
+	lda #$3b ; no blank, bitmap
+	sta $ff06
+
+	jmp pic2done
+no_kupla:
 	lda #%00100000 ; screen off
 	sta $ff06
 
@@ -517,6 +572,8 @@ dopic2:
 
 	lda #$3b ; no blank, bitmap
 	sta $ff06
+
+pic2done:
 
 endad:
 	jmp mainloop
@@ -1152,6 +1209,9 @@ cred3co: .asciiz "cred3co"
 pharsc: .asciiz "pharsc"
 pharco: .asciiz "pharco"
 
+kuplasc: .asciiz "kuplasc"
+kuplaco: .asciiz "kuplaco"
+
 signinit: .byte 0
 
 changesong: .byte 0
@@ -1418,6 +1478,7 @@ sta partpatts
 sta extracount
 sta runinit
 sta picinit
+sta pic2init
 nopartadd:
 
 ; tick and output to ted
@@ -1439,11 +1500,11 @@ frame3: .byte 0
 
 ;;;;;;;;;;;;;;;;;;;; demopart lengths, extra databyte, pointer to function
 
-partpattlen: .byte 1,2,1,1,6,1,2,1,3,64
-partpattextra: .byte 65,1,220,91,254,93,1,65,200,1
-partpattdata: .byte 0,0,0,1,0,3,0,2,0,4
+partpattlen: .byte 1,2,1,1,6,1,2,1,1,3,64
+partpattextra: .byte 65,1,220,91,254,93,2,128,240,200,1
+partpattdata: .byte 0,0,0,1,0,3,0,5,2,0,4
 
-demoparts: .word  dologo, domem, dorunner, dopic, dosign, dopic, dotalker, dopic, docredits,dopic2
+demoparts: .word  dologo, domem, dorunner, dopic, dosign, dopic, dotalker, dopic2, dopic, docredits,dopic2
 
 extracount: .byte 0
 partframes: .byte 0
@@ -1685,12 +1746,18 @@ lda runinit
 cmp #0
 bne rundo_start
 
+lda #0
+sta $ff19 ; border
+
 lda #%00100000 ; screen off
 sta $ff06
+
+
 
 ldx #<cpack
 ldy #>cpack
 jsr loadraw
+
 
 lda #1
 sta runinit

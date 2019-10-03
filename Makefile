@@ -193,7 +193,9 @@ $(DISKIMAGE): $(ASSEMBLE) $(PIC1) $(PIC2)
 	 -write "cred3sc.tc" "cred3sc" \
 	 -write "cred3co.tc" "cred3co" \
 	 -write "pharsc.tc" "pharsc" \
-	 -write "pharco.tc" "pharco"
+	 -write "pharco.tc" "pharco" \
+	 -write "kuplasc.tc" "kuplasc" \
+	 -write "kuplaco.tc" "kuplaco"
 	 
 
 
