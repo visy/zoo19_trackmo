@@ -505,12 +505,19 @@ noendad:
 	cmp #5
 	bne no_kupla
 
+
+	ldx #<kuplasc
+	ldy #>kuplasc
+	jsr loadcompd
+
+
 	ldx #<kuplaco
 	ldy #>kuplaco
 	jsr loadcompd
 
-	ldx #<kuplasc
-	ldy #>kuplasc
+
+	ldx #<kuplaco
+	ldy #>kuplaco
 	jsr loadcompd
 
 	lda #%00100000 ; screen off
@@ -1479,6 +1486,7 @@ sta extracount
 sta runinit
 sta picinit
 sta pic2init
+sta kerrat
 nopartadd:
 
 ; tick and output to ted
@@ -1500,8 +1508,8 @@ frame3: .byte 0
 
 ;;;;;;;;;;;;;;;;;;;; demopart lengths, extra databyte, pointer to function
 
-partpattlen: .byte 1,2,1,1,6,1,2,1,1,3,64
-partpattextra: .byte 65,1,220,91,254,93,2,128,240,200,1
+partpattlen: .byte 1,2,2,1,6,1,2,1,1,3,64
+partpattextra: .byte 65,1,150,91,254,93,2,128,240,200,1
 partpattdata: .byte 0,0,0,1,0,3,0,5,2,0,4
 
 demoparts: .word  dologo, domem, dorunner, dopic, dosign, dopic, dotalker, dopic2, dopic, docredits,dopic2
@@ -1624,10 +1632,10 @@ decdestoffsets:
 ;; for run anim
 
 compdataoffsets2:
-.word $6200, $64F1, $6625, $6923, $6A56, $6D7A, $6EB3, $71B2, $72E2, $75D5, $7707, $7A05, $7B35, $7E53, $7F8E, $829F
+.word $6200, $64F1, $6625, $6923, $6A56, $6D7A, $6EB3, $71B2, $72E2, $75D5, $7707, $7A05, $7B35, $7E53, $7F8E, $829F, $83D0, $86AB, $87D5, $8AE0, $8C08, $8F01, $9028, $92F5
 
 decdestoffsets2:
-.word $4F00, $09E0, $AF00, $C1E0, $4F00, $09E0, $AF00, $C1E0, $4F00, $09E0, $AF00, $C1E0, $4F00, $09E0, $AF00, $C1E0
+.word $4F00, $09E0, $AF00, $C1E0, $4F00, $09E0, $AF00, $C1E0, $4F00, $09E0, $AF00, $C1E0, $4F00, $09E0, $AF00, $C1E0, $4F00, $09E0, $AF00, $C1E0, $4F00, $09E0, $AF00, $C1E0
 
 runtimes:
 .byte 0
@@ -1645,6 +1653,13 @@ runscrolltimes:
 
 dorunner:
 
+lda kerrat
+cmp #3
+beq norunmo
+jmp yesrunmo
+norunmo:
+	jmp mainloop
+yesrunmo:
 lda runinit
 cmp #0
 bne rundo_start2
@@ -1958,14 +1973,29 @@ bne cleartop
 
 
 lda runindex
+matti:
 cmp #32
 bne runexit
 
 lda #0
 sta runindex
+
+inc kerrat
+lda kerrat
+cmp #2
+bne nofall
+lda #48
+sta matti+1
+
+
+nofall:
+
 runexit:
 
 jmp mainloop
+
+kerrat:
+	.byte 0
 
 ;;;;;;;;;;;;; more data
 
