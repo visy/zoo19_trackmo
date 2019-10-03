@@ -1509,7 +1509,7 @@ frame3: .byte 0
 ;;;;;;;;;;;;;;;;;;;; demopart lengths, extra databyte, pointer to function
 
 partpattlen: .byte 1,2,2,1,6,1,2,1,1,3,64
-partpattextra: .byte 65,1,150,91,254,93,2,128,240,200,1
+partpattextra: .byte 65,1,150,91,254,93,15,128,240,200,1
 partpattdata: .byte 0,0,0,1,0,3,0,5,2,0,4
 
 demoparts: .word  dologo, domem, dorunner, dopic, dosign, dopic, dotalker, dopic2, dopic, docredits,dopic2
