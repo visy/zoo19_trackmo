@@ -62,6 +62,10 @@ ldx #<logoco
 ldy #>logoco
 jsr loadcompdd
 
+ldx #<runpack
+ldy #>runpack
+jsr loadraw
+
 
 lda #$00
 jsr $1600           ; Initialize sid to play song 0
@@ -147,6 +151,15 @@ jmp yclr
 nocl:
 mainloop:
 
+
+lda wipeflag
+cmp #1
+bne nowiper
+
+jsr wipe
+
+nowiper:
+
 ;;;; SONG CHANGE LOGIC
 
 lda changesong
@@ -205,6 +218,8 @@ error:      ldx #COLOUR_BLACK
 stx BORDERCOLOUR
 jmp :-
 
+wipeflag:
+	.byte 0
 
 .res $1600 - *
 .incbin "music3.bin"
@@ -443,6 +458,7 @@ cmp #1
 bne nologowipe
 
 
+
 inc logowipe2
 lda logowipe2
 cmp #48
@@ -489,6 +505,211 @@ fadetab: .byte $ef,$ee,$dd,$cc,$bb,$aa,$99,$88,$00,$00,$00,$00,$00,$00
 
 logowipe: .byte 0
 logowipe2: .byte 0
+
+lim:
+	.byte 0
+lim2:
+	.byte 0
+
+dowipecol:
+	.byte 1
+
+wipeframes:
+	.byte 0
+
+
+wipe:
+
+	lda dowipecol
+	cmp #1
+	bne nowipecol
+	dec dowipecol
+
+	ldx #0
+cearluma:
+	lda #0
+	dec $0800,x
+	dec $0900,x
+	dec $0a00,x
+	dec $0b00,x
+	inx
+	cpx #0
+	bne cearluma
+
+nowipecol:
+
+	inc wipeframes
+	lda wipeframes
+	cmp #60
+	bne nowipeee
+	jmp yeswipee
+nowipeee:
+	rts
+yeswipee:
+	lda #0
+	sta wipeframes
+	inc lim
+	inc lim
+
+	lda lim
+	clc
+	sbc #1
+	sta lim2
+
+	ldx lim2
+wipeloop1:
+	lda #0
+	sta $4000,x
+	sta $4400,x
+	lda #$c1
+	sta $0c00,x
+	inx
+	cpx lim
+	bne wipeloop1
+	ldx lim2
+wipeloop2:
+	lda #0
+	sta $4100,x
+	sta $4500,x
+	lda #$c1
+	sta $0d00,x
+	inx
+	cpx lim
+	bne wipeloop2
+	ldx lim2
+wipeloop3:
+	lda #0
+	sta $4200,x
+	sta $4600,x
+	lda #$c1
+	sta $0e00,x
+	inx
+	cpx lim
+	bne wipeloop3
+	ldx lim2
+wipeloop4:
+	lda #0
+	sta $4300,x
+	sta $4700,x
+	lda #$c1
+	sta $0f00,x
+	inx
+	cpx lim
+	bne wipeloop4
+	ldx lim2
+wipeloop5:
+	lda #0
+	sta $4800,x
+	sta $4b00,x
+	inx
+	cpx lim
+	bne wipeloop5
+	ldx lim2
+wipeloop6:
+	lda #0
+	sta $4900,x
+	sta $4c00,x
+	inx
+	cpx lim
+	bne wipeloop6
+	ldx lim2
+wipeloop7:
+	lda #0
+	sta $4a00,x
+	sta $4d00,x
+	inx
+	cpx lim
+	bne wipeloop7
+	ldx lim2
+wipeloop8:
+	lda #0
+	sta $4b00,x
+	sta $4e00,x
+	inx
+	cpx lim
+	bne wipeloop8
+	ldx lim2
+wipeloop9:
+	lda #0
+	sta $4c00,x
+	sta $4f00,x
+	inx
+	cpx lim
+	bne wipeloop9
+	ldx lim2
+wipeloop1z:
+	lda #0
+	sta $5000,x
+	sta $5400,x
+	inx
+	cpx lim
+	bne wipeloop1z
+	ldx lim2
+wipeloop2z:
+	lda #0
+	sta $5100,x
+	sta $5500,x
+	inx
+	cpx lim
+	bne wipeloop2z
+	ldx lim2
+wipeloop3z:
+	lda #0
+	sta $5200,x
+	sta $5600,x
+	inx
+	cpx lim
+	bne wipeloop3z
+	ldx lim2
+wipeloop4z:
+	lda #0
+	sta $5300,x
+	sta $5700,x
+	inx
+	cpx lim
+	bne wipeloop4z
+	ldx lim2
+wipeloop5z:
+	lda #0
+	sta $5800,x
+	sta $5b00,x
+	inx
+	cpx lim
+	bne wipeloop5z
+	ldx lim2
+wipeloop6z:
+	lda #0
+	sta $5900,x
+	sta $5c00,x
+	inx
+	cpx lim
+	bne wipeloop6z
+	ldx lim2
+wipeloop7z:
+	lda #0
+	sta $5a00,x
+	sta $5d00,x
+	inx
+	cpx lim
+	bne wipeloop7z
+	ldx lim2
+wipeloop8z:
+	lda #0
+	sta $5b00,x
+	sta $5e00,x
+	inx
+	cpx lim
+	bne wipeloop8z
+	ldx lim2
+wipeloop9z:
+	lda #0
+	sta $5c00,x
+	sta $5f00,x
+	inx
+	cpx lim
+	bne wipeloop9z
+
+	rts
 
 pic4init:
 	.byte 0
@@ -837,6 +1058,20 @@ showpic3:
 
 
 picdone:
+
+lda demopart
+cmp #5
+bne no_wipeflag
+
+lda partpatts
+cmp #1
+bne no_wipeflag
+
+lda #1
+sta wipeflag
+
+no_wipeflag:
+
 
 	ldx demopart
 	lda partpattdata,x
@@ -1646,6 +1881,8 @@ sta runinit
 sta picinit
 sta pic2init
 sta kerrat
+sta wipeflag
+
 nopartadd:
 
 ; tick and output to ted
@@ -1682,7 +1919,7 @@ biisi:
 ;;;;;;;;;;;;;;;;;;;; demopart lengths, extra databyte, pointer to function
 
 
-partpattextra: .byte 65,     1,     64,       128,   1,    129,     64,     1,       150,     64,   164,        1,     1,     1
+partpattextra: .byte 65,     1,     64,       128,   214,    129,     64,     1,       150,     64,   164,        1,     1,     1
 
 partpattdata: .byte  0,      0,     0,        1,     0,      3,     6,      0,        5,      2,     0,        7,     1,     4
 
@@ -1849,9 +2086,6 @@ dorunneriniter:
 lda #%00100000 ; screen off
 sta $ff06
 
-ldx #<runpack
-ldy #>runpack
-jsr loadraw
 
 lda #0
 ldx #0
