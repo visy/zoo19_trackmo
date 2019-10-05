@@ -152,13 +152,10 @@ sta $ff06
 lda #%00010000 ; ted stop
 sta $ff07 ; ted stop
 
-ldx #<music2
-ldy #>music2
-jsr loadcompd
-
-
 lda #$00
-jsr $1600           ; Initialize sid to play song 0
+jsr $2400           ; Initialize sid to play song 0
+
+inc biisi
 
 cli
 
@@ -198,7 +195,10 @@ jmp :-
 
 
 .res $1600 - *
-.incbin "music.bin"
+.incbin "music3.bin"
+
+.res $2400 - *
+.incbin "music22.bin"
 
 .res $3800 - *
 pixbuf: ; gradient
@@ -315,11 +315,11 @@ beq nomeminit
 
 ldx #<tekstico
 ldy #>tekstico
-jsr loadcompd
+jsr loadcompdd
 
 ldx #<tekstisc
 ldy #>tekstisc
-jsr loadcompd
+jsr loadcompdd
 
 lda #8 ; mc
 sta $ff07
@@ -404,12 +404,12 @@ sta $ff07 ; ted stop
 
 ldx #<logosc
 ldy #>logosc
-jsr loadcompd
+jsr loadcompdd
 
 
 ldx #<logoco
 ldy #>logoco
-jsr loadcompd
+jsr loadcompdd
 
 
 
@@ -487,6 +487,59 @@ fadetab: .byte $ef,$ee,$dd,$cc,$bb,$aa,$99,$88,$00,$00,$00,$00,$00,$00
 logowipe: .byte 0
 logowipe2: .byte 0
 
+
+pic3init:
+	.byte 0
+
+dopic3:
+	lda pic3init
+	cmp #1
+	beq pic3inited
+
+	ldx #<cred4sc
+	ldy #>cred4sc
+	jsr loadcompdd
+
+
+	ldx #<cred4co
+	ldy #>cred4co
+	jsr loadcompdd
+
+	ldx #0
+copyloopx:
+	lda $4800,x
+	sta $0800,x
+	lda $4900,x
+	sta $0900,x
+	lda $4a00,x
+	sta $0a00,x
+	lda $4b00,x
+	sta $0b00,x
+	lda $4c00,x
+	sta $0c00,x
+	lda $4d00,x
+	sta $0d00,x
+	lda $4e00,x
+	sta $0e00,x
+	lda $4f00,x
+	sta $0f00,x
+	inx
+	cpx #0
+	bne copyloopx
+
+	lda #%00011000 ; mc
+	sta $ff07
+
+	ldx #2 ;bitmap at $6000
+	lda tedvidoffs,x
+	clc
+	sta $ff12
+
+	inc pic3init
+
+pic3inited:
+	jmp mainloop
+
 pic2init:
 	.byte 0
 
@@ -508,17 +561,17 @@ noendad:
 
 	ldx #<kuplasc
 	ldy #>kuplasc
-	jsr loadcompd
+	jsr loadcompdd
 
 
 	ldx #<kuplaco
 	ldy #>kuplaco
-	jsr loadcompd
+	jsr loadcompdd
 
 
 	ldx #<kuplaco
 	ldy #>kuplaco
-	jsr loadcompd
+	jsr loadcompdd
 
 	lda #%00100000 ; screen off
 	sta $ff06
@@ -558,16 +611,21 @@ copyloop:
 
 	jmp pic2done
 no_kupla:
+	ldx demopart
+	lda partpattdata,x
+	cmp #6
+	beq quadlogo
+
 	lda #%00100000 ; screen off
 	sta $ff06
 
 	ldx #<quadco
 	ldy #>quadco
-	jsr loadcompd
+	jsr loadcompdd
 
 	ldx #<quadsc
 	ldy #>quadsc
-	jsr loadcompd
+	jsr loadcompdd
 
 	ldx #5 ;bitmap at $4000
 	lda tedvidoffs,x
@@ -579,6 +637,43 @@ no_kupla:
 
 	lda #$3b ; no blank, bitmap
 	sta $ff06
+	jmp pic2done
+
+quadlogo:
+
+
+	lda #%00011000 ; mc
+	sta $ff07
+
+
+	ldx #2 ;bitmap at $6000
+	lda tedvidoffs,x
+	clc
+	sta $ff12
+
+	ldx #0
+copyloopz:
+	lda $8800,x
+	sta $0800,x
+	lda $8900,x
+	sta $0900,x
+	lda $8a00,x
+	sta $0a00,x
+	lda $8b00,x
+	sta $0b00,x
+	lda $8c00,x
+	sta $0c00,x
+	lda $8d00,x
+	sta $0d00,x
+	lda $8e00,x
+	sta $0e00,x
+	lda $8f00,x
+	sta $0f00,x
+	inx
+	cpx #0
+	bne copyloopz
+
+	jmp pic2done
 
 pic2done:
 
@@ -613,11 +708,11 @@ showpic1:
 
 	ldx #<halpco
 	ldy #>halpco
-	jsr loadcompd
+	jsr loadcompdd
 
 	ldx #<halpsc
 	ldy #>halpsc
-	jsr loadcompd
+	jsr loadcompdd
 
 	lda #%00001000 ; color at $0800
 	sta $ff14
@@ -660,6 +755,9 @@ showpic2:
 	lda #%00011000 ; mc
 	sta $ff07
 
+	lda #$12
+	sta $ff19
+
 	lda #$3b ; no blank, bitmap
 	sta $ff06
 
@@ -672,11 +770,19 @@ showpic3:
 
 	ldx #<pharco
 	ldy #>pharco
-	jsr loadcompd
+	jsr loadcompdd
 
 	ldx #<pharsc
 	ldy #>pharsc
-	jsr loadcompd
+	jsr loadcompdd
+
+	ldx #<hurtco
+	ldy #>hurtco
+	jsr loadcompdd
+
+	ldx #<hurtsc
+	ldy #>hurtsc
+	jsr loadcompdd
 
 	ldx #1 ;bitmap at $4000
 	lda tedvidoffs,x
@@ -755,11 +861,11 @@ sta frame3
 
 ldx #<filename2
 ldy #>filename2
-jsr loadcompd
+jsr loadcompdd
 
 ldx #<filename1
 ldy #>filename1
-jsr loadcompd
+jsr loadcompdd
 
 
 
@@ -1047,7 +1153,7 @@ no_pic3fade:
 
 	ldx #<cred3co
 	ldy #>cred3co
-	jsr loadcompd
+	jsr loadcompdd
 
 	ldx #0
 clearluma:
@@ -1092,7 +1198,6 @@ copycolor:
 
 no_pic3:
 
-
 	lda partpatts
 	cmp #2
 	bne no_pic2
@@ -1106,7 +1211,7 @@ no_pic3:
 
 	ldx #<cred2co
 	ldy #>cred2co
-	jsr loadcompd
+	jsr loadcompdd
 
 	lda #$83
 	sta $ff19 ; border
@@ -1132,11 +1237,11 @@ no_pic2:
 
 	ldx #<cred1co
 	ldy #>cred1co
-	jsr loadcompd
+	jsr loadcompdd
 
 	ldx #<cred1sc
 	ldy #>cred1sc
-	jsr loadcompd
+	jsr loadcompdd
 
 	ldx #1 ;bitmap at $4000
 	lda tedvidoffs,x
@@ -1151,11 +1256,11 @@ no_pic2:
 
 	ldx #<cred2sc
 	ldy #>cred2sc
-	jsr loadcompd
+	jsr loadcompdd
 
 	ldx #<cred3sc
 	ldy #>cred3sc
-	jsr loadcompd
+	jsr loadcompdd
 
 
 	inc creditspart
@@ -1199,6 +1304,9 @@ logoco: .asciiz "logoco"
 pillsc: .asciiz "pillsc"
 pillco: .asciiz "pillco"
 
+hurtsc: .asciiz "hurtsc"
+hurtco: .asciiz "hurtco"
+
 music2: .asciiz "music2"
 
 tekstisc: .asciiz "tekstisc"
@@ -1212,6 +1320,9 @@ cred2co: .asciiz "cred2co"
 
 cred3sc: .asciiz "cred3sc"
 cred3co: .asciiz "cred3co"
+
+cred4sc: .asciiz "cred4sc"
+cred4co: .asciiz "cred4co"
 
 pharsc: .asciiz "pharsc"
 pharco: .asciiz "pharco"
@@ -1447,6 +1558,10 @@ sta partframes3
 inc partframes2
 nopf3:
 
+lda loading
+cmp #1
+beq nopartadd
+
 inc partframes
 
 lda partframes
@@ -1470,7 +1585,7 @@ inc demopart
 
 ldx demopart
 lda partpattextra,x
-cmp #254
+cmp #31
 bne nomusicchangetoggle
 
 lda #1
@@ -1490,8 +1605,19 @@ sta kerrat
 nopartadd:
 
 ; tick and output to ted
+lda biisi
+cmp #1
+beq tokabis
+
 jsr $1603
 jsr $1606
+jmp exx
+
+tokabis:
+jsr $2403
+jsr $2406
+
+exx:
 
 pla
 tay
@@ -1506,13 +1632,18 @@ frame: .byte 0
 frame2: .byte 0
 frame3: .byte 0
 
+biisi:
+	.byte 0
+
 ;;;;;;;;;;;;;;;;;;;; demopart lengths, extra databyte, pointer to function
 
-partpattlen: .byte 1,2,2,1,6,1,2,1,1,3,64
-partpattextra: .byte 65,1,150,91,254,93,15,128,240,200,1
-partpattdata: .byte 0,0,0,1,0,3,0,5,2,0,4
 
-demoparts: .word  dologo, domem, dorunner, dopic, dosign, dopic, dotalker, dopic2, dopic, docredits,dopic2
+partpattextra: .byte 65,     1,     64,       128,   1,    128,     64,     1,       92,     64,   164,        1,     1
+
+partpattdata: .byte  0,      0,     0,        1,     0,      3,     6,      0,        5,      2,     0,        7,     4
+
+partpattlen: .byte   1,      2,     2,        1,     6,      1,     1,      2,        1,      1,     3,        1,     64
+demoparts: .word     dologo, domem, dorunner, dopic, dosign, dopic, dopic2, dotalker, dopic2, dopic, docredits,dopic3,dopic2
 
 extracount: .byte 0
 partframes: .byte 0
@@ -2015,6 +2146,16 @@ sintab:
 .byte 18, 20, 21, 23, 25, 27, 29, 31, 33, 35, 37, 40, 42, 44, 47, 49, 52, 54, 57, 59, 62
 .byte 65, 67, 70, 73, 76, 79, 82, 85, 88, 90, 93, 97, 100, 103, 106, 109, 112, 115, 118, 121, 124
 
+loading:
+.byte 0
+
+loadcompdd:
+	lda #1
+	sta loading
+	jsr loadcompd
+	lda #0
+	sta loading
+	rts
 
 ;;;; all the way to the end of memory!
 

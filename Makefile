@@ -167,35 +167,39 @@ $(DISKIMAGE): $(ASSEMBLE) $(PIC1) $(PIC2)
 	$(C1541) -format "pretending to be,qt" d64 $@
 	$(C1541) -attach $@ \
 	 -write out.prg "$(NAME)" \
+	 -write "logosc.tc" "logosc" \
+	 -write "logoco.tc" "logoco" \
+	 -write "tekstico.tc" "tekstico" \
+	 -write "tekstisc.tc" "tekstisc" \
+	 -write run_pack.tc "runpack" \
+	 -write $(HALPSC) "halpsc" \
+	 -write $(HALPCO) "halpco" \
+	 -write "music2.tc" "music2" \
 	 -write $(SIGNC) "signcol" \
 	 -write $(SIGN) "sign" \
 	 -write "sief_gra.tc" "siefgra" \
 	 -write "sief_sid.tc" "siefsid" \
-	 -write c_pack.tc "cpack" \
-	 -write run_pack.tc "runpack" \
-	 -write $(QUADSC) "quadsc" \
-	 -write $(QUADCO) "quadco" \
-	 -write $(HALPSC) "halpsc" \
-	 -write $(HALPCO) "halpco" \
-	 -write "logosc.tc" "logosc" \
-	 -write "logoco.tc" "logoco" \
-	 -write pillco.bin "pillco" \
-	 -write pillsc.bin "pillsc" \
-	 -write "music2.tc" "music2" \
-	 -write "tekstico.tc" "tekstico" \
-	 -write "tekstisc.tc" "tekstisc" \
 	 -write "sgtex.bin" "sgtex" \
 	 -write "sgcol.tc" "sgcol" \
+	 -write "pharsc.tc" "pharsc" \
+	 -write "pharco.tc" "pharco" \
+	 -write "hurtsc.tc" "hurtsc" \
+	 -write "hurtco.tc" "hurtco" \
+	 -write c_pack.tc "cpack" \
+	 -write "kuplasc.tc" "kuplasc" \
+	 -write "kuplaco.tc" "kuplaco" \
+	 -write pillco.bin "pillco" \
+	 -write pillsc.bin "pillsc" \
 	 -write "cred1sc.tc" "cred1sc" \
 	 -write "cred1co.tc" "cred1co" \
 	 -write "cred2sc.tc" "cred2sc" \
 	 -write "cred2co.tc" "cred2co" \
 	 -write "cred3sc.tc" "cred3sc" \
 	 -write "cred3co.tc" "cred3co" \
-	 -write "pharsc.tc" "pharsc" \
-	 -write "pharco.tc" "pharco" \
-	 -write "kuplasc.tc" "kuplasc" \
-	 -write "kuplaco.tc" "kuplaco"
+	 -write "cred4sc.tc" "cred4sc" \
+	 -write "cred4co.tc" "cred4co" \
+	 -write $(QUADSC) "quadsc" \
+	 -write $(QUADCO) "quadco" 
 	 
 
 
