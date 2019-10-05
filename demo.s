@@ -490,6 +490,41 @@ fadetab: .byte $ef,$ee,$dd,$cc,$bb,$aa,$99,$88,$00,$00,$00,$00,$00,$00
 logowipe: .byte 0
 logowipe2: .byte 0
 
+pic4init:
+	.byte 0
+
+dopic4:
+	lda pic4init
+	cmp #1
+	beq nopic4
+	inc pic4init
+
+	lda #$01
+	sta $ff19
+
+	ldx #<greetssc
+	ldy #>greetssc
+	jsr loadcompdd
+
+
+	ldx #<greetsco
+	ldy #>greetsco
+	jsr loadcompdd
+
+	ldx #3 ;bitmap at $8000
+	lda tedvidoffs,x
+	clc
+	sta $ff12
+
+	lda #%11000000 ; color at $c000
+	sta $ff14
+
+	lda #%00001000 ; hires
+	sta $ff07
+
+
+nopic4:
+	jmp mainloop
 
 pic3init:
 	.byte 0
@@ -609,6 +644,9 @@ no_kupla:
 	lda #%00100000 ; screen off
 	sta $ff06
 
+	lda #0
+	sta $ff19
+
 	ldx #<quadco
 	ldy #>quadco
 	jsr loadcompdd
@@ -617,16 +655,22 @@ no_kupla:
 	ldy #>quadsc
 	jsr loadcompdd
 
+
 	ldx #5 ;bitmap at $4000
 	lda tedvidoffs,x
 	clc
 	sta $ff12
+
+	lda #%00001000 ; color at $0800
+	sta $ff14
 
 	lda #%00001000 ; hires
 	sta $ff07
 
 	lda #$3b ; no blank, bitmap
 	sta $ff06
+
+
 	jmp pic2done
 
 quadlogo:
@@ -662,7 +706,6 @@ copyloopz:
 	inx
 	cpx #0
 	bne copyloopz
-
 	jmp pic2done
 
 pic2done:
@@ -784,6 +827,8 @@ showpic3:
 
 	lda #%00001000 ; hires
 	sta $ff07
+
+	lda #$1c
 
 	lda #$3b ; no blank, bitmap
 	sta $ff06
@@ -1228,6 +1273,9 @@ no_pic2:
 	lda #%00100000 ; screen off
 	sta $ff06
 
+	lda #$92
+	sta $ff19
+
 	ldx #<cred1co
 	ldy #>cred1co
 	jsr loadcompdd
@@ -1287,6 +1335,9 @@ sgtex: .asciiz  "sgtex"
 
 quadsc: .asciiz "quadsc"
 quadco: .asciiz "quadco"
+
+greetssc: .asciiz "greetssc"
+greetsco: .asciiz "greetsco"
 
 halpsc: .asciiz "halpsc"
 halpco: .asciiz "halpco"
@@ -1631,12 +1682,12 @@ biisi:
 ;;;;;;;;;;;;;;;;;;;; demopart lengths, extra databyte, pointer to function
 
 
-partpattextra: .byte 65,     1,     64,       128,   1,    129,     64,     1,       90,     64,   164,        1,     1
+partpattextra: .byte 65,     1,     64,       128,   1,    129,     64,     1,       150,     64,   164,        1,     1,     1
 
-partpattdata: .byte  0,      0,     0,        1,     0,      3,     6,      0,        5,      2,     0,        7,     4
+partpattdata: .byte  0,      0,     0,        1,     0,      3,     6,      0,        5,      2,     0,        7,     1,     4
 
-partpattlen: .byte   1,      2,     2,        1,     6,      1,     1,      2,        1,      1,     3,        1,     64
-demoparts: .word     dologo, domem, dorunner, dopic, dosign, dopic, dopic2, dotalker, dopic2, dopic, docredits,dopic3,dopic2
+partpattlen: .byte   1,      2,     2,        1,     6,      1,     1,      2,        1,      1,     3,        1,     2,     64
+demoparts: .word     dologo, domem, dorunner, dopic, dosign, dopic, dopic2, dotalker, dopic2, dopic, docredits,dopic3,dopic4,dopic2
 
 extracount: .byte 0
 partframes: .byte 0

@@ -198,6 +198,8 @@ $(DISKIMAGE): $(ASSEMBLE) $(PIC1) $(PIC2)
 	 -write "cred3co.tc" "cred3co" \
 	 -write "cred4sc.tc" "cred4sc" \
 	 -write "cred4co.tc" "cred4co" \
+	 -write "greetssc.tc" "greetssc" \
+	 -write "greetsco.tc" "greetsco" \
 	 -write $(QUADSC) "quadsc" \
 	 -write $(QUADCO) "quadco" 
 	 
