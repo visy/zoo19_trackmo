@@ -53,11 +53,25 @@ sta $ff0a
 lda #1
 sta $ff0b ;; raster counter val
 
+ldx #<logosc
+ldy #>logosc
+jsr loadcompdd
+
+
+ldx #<logoco
+ldy #>logoco
+jsr loadcompdd
+
+
 lda #$00
 jsr $1600           ; Initialize sid to play song 0
+lda #$00
+jsr $2400           ; Initialize sid to play song 0
 
 
 cli                 ; Enable interrupts again
+
+jmp nocl
 
 do_yclr:
 ldx #0
@@ -130,7 +144,7 @@ yclr2:
 jmp yclr
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; START MAINLOOP
-
+nocl:
 mainloop:
 
 ;;;; SONG CHANGE LOGIC
@@ -152,8 +166,6 @@ sta $ff06
 lda #%00010000 ; ted stop
 sta $ff07 ; ted stop
 
-lda #$00
-jsr $2400           ; Initialize sid to play song 0
 
 inc biisi
 
@@ -402,15 +414,6 @@ lda #%00010000 ; ted stop
 sta $ff07 ; ted stop
 
 
-ldx #<logosc
-ldy #>logosc
-jsr loadcompdd
-
-
-ldx #<logoco
-ldy #>logoco
-jsr loadcompdd
-
 
 
 lda #$d0
@@ -564,47 +567,34 @@ noendad:
 	jsr loadcompdd
 
 
-	ldx #<kuplaco
-	ldy #>kuplaco
-	jsr loadcompdd
-
-
-	ldx #<kuplaco
-	ldy #>kuplaco
-	jsr loadcompdd
-
 	lda #%00100000 ; screen off
 	sta $ff06
 
 	lda #$C1
 	sta $ff16 ; extra color
 
-	ldx #0
-copyloop:
-	lda $9800,x
-	sta $0800,x
-	lda $9900,x
-	sta $0900,x
-	lda $9a00,x
-	sta $0a00,x
-	lda $9b00,x
-	sta $0b00,x
-	lda $9c00,x
-	sta $0c00,x
-	lda $9d00,x
-	sta $0d00,x
-	lda $9e00,x
-	sta $0e00,x
-	lda $9f00,x
-	sta $0f00,x
-	inx
-	cpx #0
-	bne copyloop
+	lda #%00001000 ; color at $0800
+	sta $ff14
+
+	ldx #<kuplaa
+	ldy #>kuplaa
+	stx loadaddrlo
+	sty loadaddrhi
+
+	lda #$08
+	sta decdesthi
+	lda #0
+	sta decdestlo
+
+	sec
+	jsr memdecomp ;; decomp to memory based on offset tables
+
 
 	ldx #2 ;bitmap at $6000
 	lda tedvidoffs,x
 	clc
 	sta $ff12
+
 
 	lda #$3b ; no blank, bitmap
 	sta $ff06
@@ -755,7 +745,7 @@ showpic2:
 	lda #%00011000 ; mc
 	sta $ff07
 
-	lda #$12
+	lda #$11
 	sta $ff19
 
 	lda #$3b ; no blank, bitmap
@@ -764,6 +754,9 @@ showpic2:
 	jmp picdone
 
 showpic3:
+
+	lda #$1c
+	sta $ff19
 
 	lda #%00100000 ; screen off
 	sta $ff06
@@ -1585,7 +1578,7 @@ inc demopart
 
 ldx demopart
 lda partpattextra,x
-cmp #31
+cmp #129
 bne nomusicchangetoggle
 
 lda #1
@@ -1638,7 +1631,7 @@ biisi:
 ;;;;;;;;;;;;;;;;;;;; demopart lengths, extra databyte, pointer to function
 
 
-partpattextra: .byte 65,     1,     64,       128,   1,    128,     64,     1,       92,     64,   164,        1,     1
+partpattextra: .byte 65,     1,     64,       128,   1,    129,     64,     1,       90,     64,   164,        1,     1
 
 partpattdata: .byte  0,      0,     0,        1,     0,      3,     6,      0,        5,      2,     0,        7,     4
 
@@ -2145,6 +2138,9 @@ sintab:
 .byte 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 2, 2, 3, 4, 5, 5, 6, 7, 9, 10, 11, 12, 14, 15, 17
 .byte 18, 20, 21, 23, 25, 27, 29, 31, 33, 35, 37, 40, 42, 44, 47, 49, 52, 54, 57, 59, 62
 .byte 65, 67, 70, 73, 76, 79, 82, 85, 88, 90, 93, 97, 100, 103, 106, 109, 112, 115, 118, 121, 124
+
+kuplaa:
+.incbin "kuplaco.tc",2
 
 loading:
 .byte 0
